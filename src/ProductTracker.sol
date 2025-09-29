@@ -32,10 +32,10 @@ contract ProductTracker {
         _;
     }
 
-    function registerProduct(uint256 _quantity, bytes32 _hash) public {
+    function registerProduct(uint256 _quantity, bytes32 _hash) public returns (uint256) {
         //Checks
-        if(products[id].exists) revert ProductExists(); //Los errores personalizados son mas eficientes en gas
-        if(_quantity == 0) revert InvalidQuantity();
+        if(_quantity == 0) revert InvalidQuantity(); //Los errores personalizados son mas eficientes en gas
+        if(msg.sender == address(0)) revert InvalidOwner();
 
         //Effects
         uint256 id = productId++; //Obtiene el ID actual
@@ -83,17 +83,19 @@ contract ProductTracker {
         return activeProducts;
     }
 
-    function getProduct(uint256 _id) public view returns (
-        uint256 quantity,
-        bytes32 characterizationHash,
-        address currentOwner,
-        uint256 timestamp,
-        bool exists
-    ) {
+    // function getProduct(uint256 _id) public view returns (
+    //     uint256 quantity,
+    //     bytes32 characterizationHash,
+    //     address currentOwner,
+    //     uint256 timestamp,
+    //     bool exists
+    // ) {
+     function getProduct(uint256 _id) public view returns (
+        Product memory) {
         if(!products[_id].exists) revert ProductNotExists();
 
         Product memory p = products[_id];
 
-        return (p.quantity, p.characterizationHash, p.currentOwner, p.timestamp, p.exists);
+        return p;
     }
 }
