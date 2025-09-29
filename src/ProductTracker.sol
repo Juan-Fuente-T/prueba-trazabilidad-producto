@@ -10,8 +10,8 @@ contract ProductTracker {
     struct Product {
         uint256 quantity;
         bytes32 characterizationHash;
-        address currentOwner; //Control de propiedad para transferencias
         uint256 timestamp; //Marca temporal para ciclo de vida del producto
+        address currentOwner; //Control de propiedad para transferencias
         bool exists; // Indica si el producto está activo o eliminado
     }
     event ProductRegistered(uint256 indexed productId, address indexed owner);
