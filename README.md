@@ -19,6 +19,16 @@ Aplicación descentralizada para trazabilidad de productos usando blockchain.
 
 ![alt text](LatestProductTracker.svg)
 
+## Despliegue
+
+#### Se ha deplegado en Sepolia
+
+![alt text](Deploy_Sepolia.PNG)
+
+#### Se ha verificado en Etherscan
+
+![alt text](Etherscan_Verified.PNG)
+
 ## Instalación
 ```bash
 # Instalar dependencias
