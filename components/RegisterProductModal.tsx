@@ -45,7 +45,7 @@ export default function RegisterProductModal() {
           setIsOpen(true)
           setShowError(false) //Limpia el formulario si hay error
         }}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        className="bg-blue-600/90 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
         Registrar producto
       </button>

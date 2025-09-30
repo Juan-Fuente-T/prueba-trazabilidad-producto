@@ -102,7 +102,7 @@ export default function TransferProductModal() {
                     ) : (
                         <button
                             type="submit"
-                            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-red-600/90 text-white py-2 rounded hover:bg-red-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={!isOwner || !newOwner || isPending || isConfirming}
                         >
                             Transferir producto

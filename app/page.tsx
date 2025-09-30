@@ -7,7 +7,7 @@ import TransferProductModal from "@/components/TransferProductModal";
 import Header from "@/components/Header";
 import { useAccount } from "wagmi";
 import ProductSearch from "@/components/ProductSearch";
-
+import EventNotifications from "@/components/EventNotifications";
 
 export default function Home() {
   const { isConnected } = useAccount();
@@ -38,8 +38,9 @@ export default function Home() {
                     <TransferProductModal />
                   </div>
                 </div>
-                {/* Búsqueda de productos */}
+                {/* Búsqueda de productos y notificación de eventos*/}
                 <ProductSearch />
+                <EventNotifications/>
               </div>
             ) : (
               <p className="flex justify-center text-red-500 font-bold text-xl border border-red-700 rounded-md p-4">Por favor, conecta tu wallet para interactuar con el contrato.</p>

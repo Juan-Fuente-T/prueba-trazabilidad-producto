@@ -67,7 +67,6 @@ export default function ProductCard({ productId, product, onClose }: ProductCard
                 )}
                 <button
                     onClick={() => onClose()}
-                    disabled={isTransferring || !newOwner}
                     className="text-black w-fit px-2 py-1 m-2 border border-gray-800 rounded cursor-pointer disabled:opacity-50"
                 >
                     x
