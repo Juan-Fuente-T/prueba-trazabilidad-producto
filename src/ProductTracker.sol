@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+// @title Product Traceability System
+/// @author Juan Fuente
+/// @notice This contract manages product lifecycle tracking on blockchain
+/// @dev Implements registration, transfer, and soft deletion of products
 contract ProductTracker {
     uint256 public productId = 1;  // ID unico, inicia en 1 para evitar errores con el 0
     uint256 public activeProducts;     // Cantidad total de productos activos
 
     mapping(uint256 => Product) public products; //Producto asociado a su ID
 
+    /// @notice Product data structure
+    /// @dev Uses timestamp for lifecycle tracking and exists flag for soft deletion
     struct Product {
         uint256 quantity;
         bytes32 characterizationHash;
@@ -14,6 +20,7 @@ contract ProductTracker {
         address currentOwner; //Control de propiedad para transferencias
         bool exists; // Indica si el producto está activo o eliminado
     }
+
     event ProductRegistered(uint256 indexed productId, address indexed owner);
     event ProductTransferred(uint256 indexed productId, address from, address to);
     event ProductDeleted(uint256 indexed productId, address indexed owner);
@@ -31,7 +38,10 @@ contract ProductTracker {
         }
         _;
     }
-
+    /// @notice Registers a new product in the system
+    /// @param _quantity The quantity of units for this product
+    /// @param _hash The keccak256 hash characterizing the product
+    /// @return The unique ID assigned to the newly registered product
     function registerProduct(uint256 _quantity, bytes32 _hash) public returns (uint256) {
         //Checks
         if(_quantity == 0) revert InvalidQuantity(); //Los errores personalizados son mas eficientes en gas
@@ -55,6 +65,10 @@ contract ProductTracker {
         return id; //Retorna el ID del producto registrado para capturarlo en el front
     }
 
+
+    /// @notice Soft deletes a product (sets exists to false)
+    /// @dev Only the current owner can delete their product
+    /// @param _id The ID of the product to delete
     function deleteProduct(uint256 _id) public onlyOwner(_id) {
         //Checks
         if(!products[_id].exists)revert ProductNotExists(); //Los errores personalizados son mas eficientes en gas
@@ -67,6 +81,9 @@ contract ProductTracker {
         emit ProductDeleted(_id, msg.sender);
     }
 
+    /// @notice Transfers product ownership to a new address
+    /// @dev Cannot transfer to zero address, self, or contract addresses
+    /// @param _id The ID of the product to transfer
     function transferProduct(uint256 _id, address _newOwner) public onlyOwner(_id) {
         if(_newOwner == msg.sender || _newOwner == address(0)) revert InvalidOwner();
         if(!products[_id].exists)revert ProductNotExists();
@@ -79,17 +96,16 @@ contract ProductTracker {
         emit ProductTransferred(_id, oldOwner, _newOwner);
     }
 
+    /// @notice Returns the total number of active products
+    /// @return The count of non-deleted products
     function getTotalProducts() public view returns (uint256){
         return activeProducts;
     }
 
-    // function getProduct(uint256 _id) public view returns (
-    //     uint256 quantity,
-    //     bytes32 characterizationHash,
-    //     address currentOwner,
-    //     uint256 timestamp,
-    //     bool exists
-    // ) {
+    /// @notice Retrieves complete product information
+    /// @dev Reverts if product doesn't exist
+    /// @param _id The ID of the product to query
+    /// @return Product struct containing all product data
      function getProduct(uint256 _id) public view returns (
         Product memory) {
         if(!products[_id].exists) revert ProductNotExists();
