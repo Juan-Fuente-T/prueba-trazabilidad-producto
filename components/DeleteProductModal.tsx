@@ -8,12 +8,13 @@ import { useDeleteProduct } from '@/hooks/useDeleteProduct'
 export default function DeleteProductModal() {
     const [isOpen, setIsOpen] = useState(false)
     const [productId, setProductId] = useState('')
-    const { deleteProduct, isPending, isConfirming, isSuccess, error } = useDeleteProduct()
     const [showError, setShowError] = useState(false)
 
     const { product, isOwner, isLoading } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
     )
+    const { deleteProduct, isPending, isConfirming, isSuccess, error } = useDeleteProduct()
+
     useEffect(() => {
         if (error) {
             setShowError(true) // Muestra el error si existe

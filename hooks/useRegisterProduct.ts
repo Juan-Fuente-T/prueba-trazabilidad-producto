@@ -4,8 +4,6 @@
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 
-console.log("CONTRACT_ADDRESS", CONTRACT_ABI);
-
 export function useRegisterProduct() {
     const {
         writeContract,
