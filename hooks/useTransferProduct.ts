@@ -16,7 +16,7 @@ export function useTransferProduct() {
         hash,
     })
 
-    const transfer = (id: bigint, newOwner: `0x${string}`) => {
+    const transferProduct = (id: bigint, newOwner: `0x${string}`) => {
         writeContract({
             address: CONTRACT_ADDRESS,
             abi: CONTRACT_ABI,
@@ -26,7 +26,7 @@ export function useTransferProduct() {
     }
 
     return {
-        transfer,
+        transferProduct,
         isPending,        // Esperando confirmación de wallet
         isConfirming,     // Esperando que se mine en blockchain
         isSuccess,        // Transacción minada exitosamente

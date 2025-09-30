@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Modal from './Modal'
 import { useRegisterProduct } from '@/hooks/useRegisterProduct'
-import { parseEther, keccak256, toBytes } from 'viem'
+import { keccak256, toBytes } from 'viem'
 
 export default function RegisterProductModal() {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,7 +11,7 @@ export default function RegisterProductModal() {
   const [hash, setHash] = useState('')
   const [showError, setShowError] = useState(false)
 
-  const { register, isPending, isConfirming, isSuccess, error } = useRegisterProduct()
+  const { registerProduct, isPending, isConfirming, isSuccess, error } = useRegisterProduct()
 
   useEffect(() => {
     if (error) {
@@ -33,7 +33,7 @@ export default function RegisterProductModal() {
     e.preventDefault()
 
     const hashBytes = keccak256(toBytes(hash))
-    register(BigInt(quantity), hashBytes)
+    registerProduct(BigInt(quantity), hashBytes)
 
     console.log(' Registrando producto:', { quantity, hash })
   }

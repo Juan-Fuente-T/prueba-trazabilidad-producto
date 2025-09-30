@@ -14,7 +14,7 @@ export default function TransferProductModal() {
     const { product, isOwner, isLoading } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
     )
-    const { transfer, isPending, isConfirming, isSuccess, error } = useTransferProduct()
+    const { transferProduct, isPending, isConfirming, isSuccess, error } = useTransferProduct()
 
     useEffect(() => {
         if (error) {
@@ -37,7 +37,7 @@ export default function TransferProductModal() {
 
         if (!isOwner) return // Se valida antes que sea dueño del producto
         //Todo: validar que el id no se de un producto ya borrado
-        transfer(BigInt(productId), newOwner as `0x${string}`)
+        transferProduct(BigInt(productId), newOwner as `0x${string}`)
 
         setProductId('')
         setNewOwner('')

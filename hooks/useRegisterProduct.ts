@@ -16,7 +16,7 @@ export function useRegisterProduct() {
         hash,
     })
 
-    const register = (quantity: bigint, characterizationHash: `0x${string}`) => {
+    const registerProduct = (quantity: bigint, characterizationHash: `0x${string}`) => {
         writeContract({
             address: CONTRACT_ADDRESS,
             abi: CONTRACT_ABI,
@@ -26,7 +26,7 @@ export function useRegisterProduct() {
     }
     console.log('Producto registrado:', hash)
     return {
-        register,
+        registerProduct,
         isPending,        // Esperando confirmación de wallet
         isConfirming,     // Esperando que se mine en blockchain
         isSuccess,        // Transacción minada exitosamente

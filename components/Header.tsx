@@ -11,7 +11,7 @@ export default function Header() {
                 <Image src="/cetim-centro-tecnologico-logo-web-2023.png" alt="Logo" width={150} height={10} />
                 {/* Título */}
                 <h1 className="text-2xl font-bold text-gray-800">
-                    Product Traceability
+                    Cetim&apos;s Product Traceability
                 </h1>
                 {/* Botón de conexión */}
                 <ConnectButton />
