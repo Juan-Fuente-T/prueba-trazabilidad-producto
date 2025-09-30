@@ -7,24 +7,24 @@ Aplicación descentralizada para trazabilidad de productos en blockchain.
 ### Ciclo de vida completo
 Aunque los requisitos mencionaban "seguimiento de eventos a lo largo del ciclo de vida", no especificaban qué funcionalidades debían implementarse. Para asegurar una cobertura completa, implementé el ciclo de vida completo:
 - **Registro** de productos
-- **Transferencia** de propiedad entre addresses
+- **Transferencia** de propiedad entre addresses (cuentas)
 - **Eliminación** lógica (soft delete)
 
 ### Testing exhaustivo
 Los requisitos pedían cobertura de "registro de productos" y "registro de eventos". Para una cobertura más robusta, incluí:
 - Tests de la función de registro de productos (happy paths)
-- Tests de casos en registro de productos (reverts)
-- Validación de eventos para las tres operaciones
+- Tests de casos de error en registro de productos (reverts)
+- Simple validación de eventos para las tres operaciones
 
 **Nota:** Soy consciente de que se podría mejorar mucho el test, pero consideré que para esta prueba técnica el alcance actual demuestra capacidad de testing sin excederse en tiempo de desarrollo.
 
 ### Optimización de gas
-Durante el desarrollo, optimicé el storage layout del struct `Product`, reduciendo de 4 a 3 slots de almacenamiento mediante reordenamiento de variables:
+Durante el desarrollo, optimicé el storage layout del struct `Product`, reduciendo de 5 a 4 slots de almacenamiento mediante reordenamiento de variables:
 
-**Antes (4 slots):**
+**Antes (5 slots):**
 ![Storage antes](./screenshots/FirstProductTracker.svg)
 
-**Después (3 slots):**
+**Después (4 slots):**
 ![Storage después](./screenshots/LatestProductTracker.svg)
 
 Esta optimización reduce el costo de gas, aunque en este caso concreto la diferencia no es significativa.
@@ -85,17 +85,6 @@ Aunque no estaba explícitamente requerido, implementé:
 
 ## Despliegue
 
-### Se optimiza la memoria para mejorar el rendimiento y el coste
-
-#### Primera comprobación. La dirección del owner(slot 24 del struct) y el booleano(slot 4) estan ocupando slots imcompletos.
-
-![alt text](./screenshots/FirstProductTracker.svg)
-
-#### Segunda comprobación. La dirección del owner y el booleano ahora ocupan un solo slot(slot 3).
-
-![alt text](./screenshots/LatestProductTracker.svg)
-
-
 ### Se despliega en Sepolia
 
 ![alt text](./screenshots/Deploy_Sepolia.PNG)
@@ -104,7 +93,7 @@ Aunque no estaba explícitamente requerido, implementé:
 
 ![alt text](./screenshots/Etherscan_Verified.PNG)
 
-#### Contrato verificado en Sepolia
+#### Contrato desplegado en Sepolia
 
 Address: 0xE509E7039bd8D78518822B5cBE80E93D84D2c452
 
@@ -118,7 +107,7 @@ Address: 0xE509E7039bd8D78518822B5cBE80E93D84D2c452
 
 - [Registro de producto](https://sepolia.etherscan.io/tx/0xfc4eb7b755387a268dec099002cc1ad06bb682132774c5d653dabf278a0a0390)
 - [Transferencia](https://sepolia.etherscan.io/tx/0x7fc3e74a2ba26c90c59d1a6ccc4665849ce8922a96eb5709068c9955a76f214e)
-- [Eliminación](https://sepolia.etherscan.io/tx/0x4660c5cbe584791efad71d628521974ba7228d7fd6e60e12489c42daa6d399b0) Eliminación
+- [Eliminación](https://sepolia.etherscan.io/tx/0x4660c5cbe584791efad71d628521974ba7228d7fd6e60e12489c42daa6d399b0)
 
 📦 Instalación
 # Clonar repo
@@ -138,7 +127,7 @@ npm run dev
 
 🔐 Variables de Entorno
 
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
-SEPOLIA_RPC_URL=...
-PRIVATE_KEY=...
-ETHERSCAN_API_KEY=...
+- NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
+- SEPOLIA_RPC_URL=...
+- PRIVATE_KEY=...
+- ETHERSCAN_API_KEY=...

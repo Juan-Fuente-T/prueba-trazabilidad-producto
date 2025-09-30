@@ -19,7 +19,7 @@ export default function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <main className="container mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold">Prueba técnica para traceabilidad de producto con Next y Solidity</h1>
+              <h1 className="text-3xl font-bold">Prueba técnica para trazabilidad de producto con Next y Solidity</h1>
             </div>
             {isConnected ? (
               <div className="grid gap-6 justify-center">
@@ -43,7 +43,9 @@ export default function Home() {
                 <EventNotifications/>
               </div>
             ) : (
-              <p className="flex justify-center text-red-500 font-bold text-xl border border-red-700 rounded-md p-4">Por favor, conecta tu wallet para interactuar con el contrato.</p>
+              <p className="flex justify-center text-red-500 font-bold text-xl border border-red-700 rounded-md p-4">
+                Por favor, conecta tu wallet en Sepolia para interactuar con el contrato.
+              </p>
             )}
           </main>
         </div>
