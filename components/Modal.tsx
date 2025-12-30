@@ -13,10 +13,10 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     <div className="fixed inset-0 bg-[#000000]/75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">{title}</h2>
+          <h2 className="text-xl text-stone-800 font-bold">{title}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-white/80 hover:text-white bg-stone-500 hover:bg-stone-700 p-1 rounded-full w-8 h-8 flex items-center justify-center transition-colors cursor-pointer"
           >
             ✕
           </button>

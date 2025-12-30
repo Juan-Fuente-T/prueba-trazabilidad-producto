@@ -5,8 +5,12 @@ import Modal from './Modal'
 import { useRegisterProduct } from '@/hooks/useRegisterProduct'
 import { keccak256, toBytes } from 'viem'
 
-export default function RegisterProductModal() {
-  const [isOpen, setIsOpen] = useState(false)
+interface RegisterProductModalProps {
+    isOpen: boolean
+    onClose: () => void
+}
+
+export default function RegisterProductModal({ isOpen, onClose }: RegisterProductModalProps) {
   const [quantity, setQuantity] = useState('')
   const [hash, setHash] = useState('')
   const [showError, setShowError] = useState(false)
@@ -20,14 +24,14 @@ export default function RegisterProductModal() {
     if (isSuccess) {
       // Espera 3 segundos para que el usuario vea el mensaje de éxito
       const timer = setTimeout(() => {
-        setIsOpen(false)
+        onClose()
         setQuantity('')
         setHash('')
       }, 3000)
 
       return () => clearTimeout(timer) // Limpia el timer si el componente se desmonta
     }
-  }, [isSuccess, error])
+  }, [isSuccess, error, onClose])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,20 +42,9 @@ export default function RegisterProductModal() {
     console.log(' Registrando producto:', { quantity, hash })
   }
 
-  return (
-    <>
-      <button
-        onClick={() => {
-          setIsOpen(true)
-          setShowError(false) //Limpia el formulario si hay error
-        }}
-        className="bg-blue-600/90 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Registrar producto
-      </button>
-
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Register Product">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Register Product">
+        <form onSubmit={handleSubmit} className="space-y-4 z-[999]">
           <div>
             <label className="block text-sm font-medium mb-1">Cantidad</label>
             <input
@@ -84,7 +77,7 @@ export default function RegisterProductModal() {
           ) : (
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!quantity || !hash || isPending || isConfirming}
             >
               Crear
@@ -92,6 +85,5 @@ export default function RegisterProductModal() {
           )}
         </form>
       </Modal>
-    </>
   )
 }
