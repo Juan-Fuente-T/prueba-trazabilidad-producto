@@ -1,6 +1,5 @@
 package com.juanfuente.trazabilidad_producto_blockchain.repository;
 
-
 import com.juanfuente.trazabilidad_producto_blockchain.model.ProductEvent;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

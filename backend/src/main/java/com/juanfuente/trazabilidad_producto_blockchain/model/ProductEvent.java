@@ -23,6 +23,10 @@ public class ProductEvent {
     @Indexed(unique = true) // No puede haber dos eventos con el mismo hash
     private String transactionHash;
 
+    @NotBlank(message = "El hash del producto es obligatorio")
+    @Indexed(unique = true)
+    private String productHash;
+
     @NotBlank(message = "La dirección de origen (from) es obligatoria")
     private String fromAddress;
 

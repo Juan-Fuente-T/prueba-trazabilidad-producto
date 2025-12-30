@@ -10,20 +10,34 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "products")
 public class Product {
-    @Id
-    private String id;
 
-    @NotNull(message = "El ID de Blockchain es obligatorio")
+    @Id
+    private String id; // ID en Mongo
+
+    @NotNull
     @Indexed(unique = true)
-    private Long blockchainId; // El ID numérico en el Smart Contract (ej: 1, 2, 3)
+    private Long blockchainId; // El ID numérico en el contrato
+
+    @NotNull
+    private Long quantity;
+
+    @NotBlank
+    @Indexed(unique = true)
+    private String characterizationHash; // `0x${string}`
+
+    @NotBlank
+    private String currentOwner; // `0x${string}`
+
+    @NotBlank
+    private Long timestamp; // bigint en TS -> Long en Java
+
+    private boolean active; // exists: boolean
+
+    // --- DATOS solo en Mongo) ---
     @NotBlank(message = "El nombre no puede estar vacío")
     private String name;
+
     private String description;
+
     private String imageUrl;
-    @NotBlank(message = "El dueño actual es obligatorio")
-    private String currentOwner; // Dirección 0x...
-    @NotBlank(message = "El estado es obligatorio")
-    private String status; // "ACTIVE", "BURNED"
-    @NotBlank(message = "El hash es obligatorio")
-    private String characterizationHash; // El hash en Blockchain
 }
