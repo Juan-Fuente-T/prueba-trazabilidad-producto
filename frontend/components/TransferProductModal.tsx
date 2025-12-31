@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import Modal from './Modal'
 import { useGetProduct } from '@/hooks/useGetProduct'
 import { useTransferProduct } from '@/hooks/useTransferProduct'
+import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles'
+import { getRoleName } from '@/utils/roleUtils'
+import { shortenAddress } from '@/utils/formatters';
 
 interface TransferProductModalProps {
     isOpen: boolean
@@ -13,92 +16,129 @@ interface TransferProductModalProps {
 export default function TransferProductModal({ isOpen, onClose }: TransferProductModalProps) {
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
-    const [showError, setShowError] = useState(false)
 
-    const { product, isOwner, isLoading } = useGetProduct(
+    const { product, isOwner, isLoading, error: readError } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
     )
-    const { transferProduct, isPending, isConfirming, isSuccess, error } = useTransferProduct()
+    const currentStatusLabel = product ? getRoleName(product.currentOwner) : "Desconocido"
+
+    const { transferProduct, isPending, isConfirming, isSuccess, error: writeError } = useTransferProduct()
 
     useEffect(() => {
-        if (error) {
-            setShowError(true)
+        if (!isOpen) {
+            setProductId('')
+            setNewOwner('')
         }
-        if (isSuccess) {
-            const timer = setTimeout(() => {
-                onClose()
-                setProductId('')
-            }, 3000)
-            return () => clearTimeout(timer)
-        }
-    }, [isSuccess, error, onClose])
+    }, [isOpen])
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         console.log('Transfer product:', { productId, newOwner })
 
-        if (!isOwner) return // Se valida antes que sea dueño del producto
+        if (!productId || !newOwner) return
         //Todo: validar que el id no sea de un producto ya borrado
         transferProduct(BigInt(productId), newOwner as `0x${string}`)
-
-        setProductId('')
-        setNewOwner('')
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Transfer Product">
-            <form onSubmit={handleSubmit} className="space-y-4 z-[999]">
+        <Modal isOpen={isOpen} onClose={onClose} title="Transferir Producto">
+            <form onSubmit={handleSubmit} className="space-y-4">
+
+                {/* INPUT ID */}
                 <div>
-                    <label className="block text-sm font-medium mb-1">Product ID</label>
+                    <label className="block text-sm font-medium mb-1">ID del Producto</label>
                     <input
                         type="number"
                         value={productId}
                         onChange={(e) => setProductId(e.target.value)}
-                        className="w-full border rounded px-3 py-2"
-                        placeholder="Enter product ID"
-                        required
+                        className="w-full border rounded px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Ej: 1"
                         min={1}
-                    //Todo: añadir no permitir letras o decimales
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">New Owner Address</label>
-                    <input
-                        type="text"
-                        value={newOwner}
-                        onChange={(e) => setNewOwner(e.target.value)}
-                        className="w-full border rounded px-3 py-2"
-                        placeholder="0x..."
-                        pattern="^0x[a-fA-F0-9]{40}$"
                         required
                     />
                 </div>
-                {productId && product && !isOwner && (
-                    <p className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
-                        No es posible realizar la operación. Solo el dueño puede transferir el producto.
-                    </p>
+
+                {productId && product && (
+                    <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm">
+                        <p><strong>Estado Actual:</strong> {currentStatusLabel}</p>
+                        <p className="text-xs text-gray-500 mt-1" title={product.currentOwner}>
+                            <strong>Dueño:</strong> {shortenAddress(product.currentOwner)}
+                        </p>
+
+                        {!isOwner && (
+                            <p className="text-red-500 font-bold mt-2 text-xs">
+                                ⛔ No eres el dueño. No puedes transferirlo.
+                            </p>
+                        )}
+                    </div>
                 )}
+
                 {productId && !product && !isLoading && (
-                    <p className="text-red-600 text-sm">
-                        Producto no encontrado
-                    </p>
+                    <p className="text-red-500 text-sm font-medium">❌ Producto no encontrado o ID inválido</p>
                 )}
-                {isSuccess ? (
-                    <p className="text-green-500 mt-2">Producto transferido exitosamente.</p>
-                ) : (
-                    showError && error && <p className="text-red-500 mt-2">{`Error al transferir el producto: ${error}`}</p>
+
+                {/* SELLECCION ROL */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Nuevo Destino</label>
+                    <div className="flex flex-col md:flex-row gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.MAYORISTA || '')}
+                            disabled={!isOwner}
+                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            🏭 Mayorista
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.TRANSPORTISTA || '')}
+                            disabled={!isOwner}
+                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            🚚 Transportista
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.PUNTO_VENTA || '')}
+                            disabled={!isOwner}
+                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            🏪 Tienda
+                        </button>
+                    </div>
+                </div>
+
+                {/* INPUT MANUAL DE ADDRESS*/}
+                <input
+                    type="text"
+                    value={newOwner}
+                    onChange={(e) => setNewOwner(e.target.value)}
+                    className="w-full border-b border-gray-300 py-1 text-sm focus:outline-none focus:border-indigo-500"
+                    placeholder="O dirección manual (0x...)"
+                    required
+                />
+
+                {/* MOSTRAR ERRORES */}
+                {(writeError || readError) && (
+                    <div className="bg-red-50 p-2 rounded border border-red-200">
+                        <p className="text-red-600 text-xs text-center break-words">
+                            Error: {writeError?.message || readError?.message}
+                        </p>
+                    </div>
                 )}
-                {isPending || isConfirming ? (
-                    <p className="text-blue-500 mt-2">Transacción en proceso...</p>
-                ) : (
-                    <button
-                        type="submit"
-                        className="w-full bg-indigo-600/90 text-white py-2 rounded hover:bg-indigo-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!isOwner || !newOwner || isPending || isConfirming}
-                    >
-                        Transferir producto
-                    </button>
-                )}
+
+                {isSuccess && <p className="text-green-600 font-bold text-center">✅ Transferencia completada</p>}
+
+                {/* BOTÓN TRANSFERENCIA */}
+                <button
+                    type="submit"
+                    className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+                    disabled={!productId || !newOwner || !isOwner || isPending || isConfirming}
+                >
+                    {isPending || isConfirming ? 'Procesando...' : 'Transferir Propiedad'}
+                </button>
+
             </form>
         </Modal>
     )
