@@ -14,15 +14,11 @@ export default function Home() {
   const { isConnected } = useAccount();
 
   return (
-    // 1. CORREGIDO: Quitado 'items-center' y 'justify-center'. Ahora es un contenedor flex normal.
     <div className="min-h-screen flex flex-col pt-24 bg-stone-50">
       <Header />
-
-      {/* 2. CORREGIDO: Main con w-full ocupa todo el ancho disponible */}
       <main className="flex-1 flex flex-col w-full px-4 sm:px-6 md:px-8 sm:py-12 py-8 bg-stone-50">
 
         {/* SECCIÓN 1: BUSCADOR */}
-        {/* Tiene w-full y mx-auto. Se centrará correctamente. */}
         <section className="w-full mx-auto flex gap-4 items-center flex-col max-w-5xl mb-8">
           <div className="flex justify-between items-center mx-auto mb-8 sm:mb-12 w-full">
             <h1 className="text-lg sm:text-xl font-semibold mb-4 text-center w-full">
@@ -84,7 +80,6 @@ export default function Home() {
         )}
 
         {/* SECCIÓN 3: NO CONECTADO */}
-        {/* 3. CORREGIDO: Añadido 'w-full mx-auto' que faltaba aquí, por eso se pegaba a la izquierda */}
         {!isConnected && (
           <div className="w-full mx-auto flex flex-col items-center justify-center max-w-5xl p-10 border-2 border-dashed border-stone-300 rounded-xl bg-stone-100">
             <p className="text-lg font-medium text-stone-600 mb-2">🔒 Acceso Restringido</p>
