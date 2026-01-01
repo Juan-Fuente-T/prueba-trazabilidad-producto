@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Modal from './Modal'
+import Modal from '../../ui/Modal'
 import { useGetProduct } from '@/hooks/useGetProduct'
 import { useTransferProduct } from '@/hooks/useTransferProduct'
 import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles'
-import { getRoleName } from '@/utils/roleUtils'
-import { shortenAddress } from '@/utils/formatters';
+import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
+import ProductInfoCard from '@/components/ui/ProductInfoCard'
 
 interface TransferProductModalProps {
     isOpen: boolean
@@ -17,10 +17,13 @@ export default function TransferProductModal({ isOpen, onClose }: TransferProduc
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
 
-    const { product, isOwner, isLoading, error: readError } = useGetProduct(
+    const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
     )
-    const currentStatusLabel = product ? getRoleName(product.currentOwner) : "Desconocido"
+
+    // Solo llama a BD si existe el producto en blockchain
+    const idParaBuscarEnBD = product ? productId : null;
+    const { productDB, isLoading: loadingDB } = useGetProductFromDB(idParaBuscarEnBD)
 
     const { transferProduct, isPending, isConfirming, isSuccess, error: writeError } = useTransferProduct()
 
@@ -31,10 +34,8 @@ export default function TransferProductModal({ isOpen, onClose }: TransferProduc
         }
     }, [isOpen])
 
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Transfer product:', { productId, newOwner })
 
         if (!productId || !newOwner) return
         //Todo: validar que el id no sea de un producto ya borrado
@@ -58,26 +59,17 @@ export default function TransferProductModal({ isOpen, onClose }: TransferProduc
                         required
                     />
                 </div>
-
-                {productId && product && (
-                    <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm">
-                        <p><strong>Estado Actual:</strong> {currentStatusLabel}</p>
-                        <p className="text-xs text-gray-500 mt-1" title={product.currentOwner}>
-                            <strong>Dueño:</strong> {shortenAddress(product.currentOwner)}
-                        </p>
-
-                        {!isOwner && (
-                            <p className="text-red-500 font-bold mt-2 text-xs">
-                                ⛔ No eres el dueño. No puedes transferirlo.
-                            </p>
-                        )}
-                    </div>
-                )}
-
-                {productId && !product && !isLoading && (
-                    <p className="text-red-500 text-sm font-medium">❌ Producto no encontrado o ID inválido</p>
-                )}
-
+                {/* 🔥 COMPONENTE REUTILIZABLE (Modo Default/Azul) */}
+                <ProductInfoCard
+                    productId={productId}
+                    product={product}
+                    productDB={productDB}
+                    loadingDB={loadingDB}
+                    isLoadingBlockchain={loadingBC}
+                    isOwner={isOwner}
+                    variant="default"
+                    minHeight="130px"
+                />
                 {/* SELLECCION ROL */}
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">Nuevo Destino</label>
@@ -120,7 +112,8 @@ export default function TransferProductModal({ isOpen, onClose }: TransferProduc
                 />
 
                 {/* MOSTRAR ERRORES */}
-                {(writeError || readError) && (
+                {/* Filtra error de lectura, "revert", que ya se esta gestionando*/}
+                {(writeError || (readError && !readError.message.includes("reverted"))) && (
                     <div className="bg-red-50 p-2 rounded border border-red-200">
                         <p className="text-red-600 text-xs text-center break-words">
                             Error: {writeError?.message || readError?.message}
