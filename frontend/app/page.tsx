@@ -1,14 +1,14 @@
 'use client'
 
-import RegisterProductModal from "@/components/RegisterProductModal";
-import DeleteProductModal from "@/components/DeleteProductModal";
-import TransferProductModal from "@/components/TransferProductModal";
-import GenericActionController from "@/components/GenericActionController";
-import Header from "@/components/Header";
+import RegisterProductModal from "@/components/products/modals/RegisterProductModal";
+import DeleteProductModal from "@/components/products/modals/DeleteProductModal";
+import TransferProductModal from "@/components/products/modals/TransferProductModal";
+import GenericActionController from "@/components/products/GenericActionController";
+import Header from "@/components/layout/Header";
 import { useAccount } from "wagmi";
-import ProductSearch from "@/components/ProductSearch";
-import EventNotifications from "@/components/EventNotifications";
-import Footer from "@/components/Footer";
+import ProductSearch from "@/components/products/ProductSearch";
+import EventNotifications from "@/components/events/EventNotifications";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   const { isConnected } = useAccount();

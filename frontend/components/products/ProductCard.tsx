@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 // Asegúrate de que las rutas a tus modales sean correctas
-import TransferProductModal from './TransferProductModal';
-import DeleteProductModal from './DeleteProductModal';
+import TransferProductModal from './modals/TransferProductModal';
+import DeleteProductModal from './modals/DeleteProductModal';
 
 interface ProductData {
     quantity: bigint
