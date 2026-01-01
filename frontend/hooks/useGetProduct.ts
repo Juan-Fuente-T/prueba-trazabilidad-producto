@@ -2,14 +2,8 @@
 'use client'
 import { useReadContract, useAccount } from 'wagmi'
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
+import { Product } from '@/types/product'
 
-type Product = {
-    quantity: bigint
-    characterizationHash: `0x${string}`
-    currentOwner: `0x${string}`
-    timestamp: bigint
-    exists: boolean
-}
 
 export function useGetProduct(productId?: bigint) {
     const { address } = useAccount()
