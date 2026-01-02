@@ -1,53 +1,63 @@
+// src/app/page.tsx
 'use client'
-
-import Header from "@/components/layout/Header";
-import { useAccount } from "wagmi";
-import ProductSearch from "@/components/products/ProductSearch";
-import Footer from "@/components/layout/Footer";
-import OperationsPanel from "@/components/products/OperationsPanel";
-import ProductList from "@/components/products/ProductList";
-import useGetProductListFromDB from "@/hooks/useGetProductListFromDB";
+import { useState } from 'react'
+import Header from '@/components/layout/Header'
+import ProductList from '@/components/products/ProductList'
+import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
+import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
+import GenericActionController from '@/components/ui/GenericActionController'
+import useGetProductListFromDB from '@/hooks/useGetProductListFromDB'
 
 export default function Home() {
-  const { isConnected } = useAccount();
-  const {productListDB} = useGetProductListFromDB();
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
+  const { productListDB, isLoading, error } = useGetProductListFromDB()
 
   return (
-    <div className="min-h-screen flex flex-col pt-24 bg-stone-50">
+    <main className="min-h-screen bg-stone-50 pb-20 mt-8 md:mt-20">
       <Header />
-      <main className="flex-1 flex flex-col w-full px-4 sm:px-6 md:px-8 sm:py-12 py-8 bg-stone-50">
 
-        {/* SECCIÓN 1: BUSCADOR */}
-        <section className="w-full mx-auto flex gap-4 items-center flex-col max-w-5xl mb-8">
+      <div className="container mx-auto px-4 py-8">
+        {/* CABECERA*/}
+        <div className="flex  flex-col justify-between items-end">
+          <h1 className="text-lg sm:text-2xl font-bold mb-12 mt-8 text-center w-full">
+            Prueba de concepto para trazabilidad de producto en Blockchain (con Next y Solidity)
+          </h1>
+          {/* 2. BARRA SUPERIOR: BOTÓN DE CREAR */}
           <div className="flex justify-between items-center mx-auto mb-8 sm:mb-12 w-full">
-            <h1 className="text-lg sm:text-xl font-semibold mb-4 text-center w-full">
-              Prueba técnica para trazabilidad de producto en Blockchain con Next y Solidity
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold text-stone-800">Inventario</h1>
+              <p className="text-stone-500">Panel de Control</p>
+            </div>
+            {/* <button
+              onClick={() => setIsRegisterOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm flex items-center gap-2"
+            >
+              ＋ Nuevo Producto
+            </button> */}
+            <GenericActionController
+            buttonText="＋ Nuevo Producto"
+                buttonColor="bg-emerald-600 hover:bg-emerald-700"
+                ModalComponent={RegisterProductModal}
+            />
           </div>
+        </div>
 
-          <div className="mx-auto w-full">
-            <ProductSearch />
-          </div>
-        </section>
+        {/* ZONA DE OPERACIONES RÁPIDAS*/}
+        <QuickOperationsPanel />
 
-        {/* SECCIÓN 2: GESTIÓN */}
-        {isConnected && (
-          <>
-          <OperationsPanel/>
-          <ProductList products={productListDB}/>
-          </>
+        {/* ZONA DE EXPLORACIÓN DE PRODUCTOS*/}
+        <div className="mt-8">
+          <h2 className="text-lg font-bold text-stone-700 mb-4">Catálogo de Activos</h2>
+          {isLoading ? (
+            <p className="text-center py-10 text-stone-500">Cargando...</p>
+          ) : (
+            <ProductList products={productListDB || []} />
           )}
+        </div>
 
-        {/* SECCIÓN 3: NO CONECTADO */}
-        {!isConnected && (
-          <div className="w-full mx-auto flex flex-col items-center justify-center max-w-5xl p-10 border-2 border-dashed border-stone-300 rounded-xl bg-stone-100">
-            <p className="text-lg font-medium text-stone-600 mb-2">🔒 Acceso Restringido</p>
-            <p className="text-stone-500">Conecta tu wallet en Sepolia para continuar.</p>
-          </div>
-        )}
+      </div>
 
-      </main>
-      <Footer />
-    </div>
-  );
+      <RegisterProductModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+    </main>
+  )
 }
