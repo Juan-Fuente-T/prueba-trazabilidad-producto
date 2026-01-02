@@ -6,7 +6,7 @@ import { useGetProduct } from '@/hooks/useGetProduct'
 import { useTransferProduct } from '@/hooks/useTransferProduct'
 import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles'
 import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
-import ProductInfoCard from '@/components/ui/ProductInfoCard'
+import ProductInfoCard from '@/components/products/ProductInfoCard'
 
 interface TransferProductModalProps {
     isOpen: boolean

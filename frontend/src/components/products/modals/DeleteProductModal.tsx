@@ -5,7 +5,7 @@ import Modal from '../../ui/Modal'
 import { useGetProduct } from '@/hooks/useGetProduct'
 import { useDeleteProduct } from '@/hooks/useDeleteProduct'
 import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
-import ProductInfoCard from '@/components/ui/ProductInfoCard'
+import ProductInfoCard from '@/components/products/ProductInfoCard'
 
 interface DeleteProductModalProps {
     isOpen: boolean
