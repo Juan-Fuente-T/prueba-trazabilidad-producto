@@ -145,10 +145,10 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
 
             {/* MODALES OCULTOS */}
             {isOwner && (
-                <>
-                    <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} />
-                    <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
-                </>
+            <>
+                <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={product.blockchainId.toString()} />
+                <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={product.blockchainId.toString()}/>
+            </>
             )}
         </div>
     )

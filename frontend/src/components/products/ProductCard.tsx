@@ -139,8 +139,8 @@ export default function ProductCard({ productId, product, onClose }: productCard
             {/* Renderizado condicional de los Modales */}
             {isOwner && (
                 <>
-                    <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} />
-                    <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
+                    <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={productId?.toString()} />
+                    <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={productId?.toString()}/>
                 </>
             )}
         </div>

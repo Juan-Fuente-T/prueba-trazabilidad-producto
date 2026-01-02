@@ -11,9 +11,10 @@ import ProductInfoCard from '@/components/products/ProductInfoCard'
 interface TransferProductModalProps {
     isOpen: boolean
     onClose: () => void
+    preFilledId?: string
 }
 
-export default function TransferProductModal({ isOpen, onClose }: TransferProductModalProps) {
+export default function TransferProductModal({ isOpen, onClose, preFilledId }: TransferProductModalProps) {
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
 
@@ -28,11 +29,13 @@ export default function TransferProductModal({ isOpen, onClose }: TransferProduc
     const { transferProduct, isPending, isConfirming, isSuccess, error: writeError } = useTransferProduct()
 
     useEffect(() => {
-        if (!isOpen) {
+        // Si está abierto y ha llegado un ID prefijado, se asigna.
+        if (isOpen && preFilledId) {
+            setProductId(preFilledId)
+        } else {
             setProductId('')
-            setNewOwner('')
         }
-    }, [isOpen])
+    }, [isOpen, preFilledId])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()

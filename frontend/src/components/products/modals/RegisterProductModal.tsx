@@ -13,6 +13,7 @@ import { fileToBase64 } from '@/utils/fileUtils'
 interface RegisterProductModalProps {
   isOpen: boolean
   onClose: () => void
+  preFilledId?: string
 }
 
 export default function RegisterProductModal({ isOpen, onClose }: RegisterProductModalProps) {

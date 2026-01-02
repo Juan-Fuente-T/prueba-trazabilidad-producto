@@ -10,9 +10,10 @@ import ProductInfoCard from '@/components/products/ProductInfoCard'
 interface DeleteProductModalProps {
     isOpen: boolean
     onClose: () => void
+    preFilledId?: string
 }
 
-export default function DeleteProductModal({ isOpen, onClose }: DeleteProductModalProps) {
+export default function DeleteProductModal({ isOpen, onClose, preFilledId }: DeleteProductModalProps) {
     const [productId, setProductId] = useState('')
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
@@ -24,12 +25,14 @@ export default function DeleteProductModal({ isOpen, onClose }: DeleteProductMod
     const idParaBuscarEnBD = product ? productId : null;
     const { productDB, isLoading: loadingDB } = useGetProductFromDB(idParaBuscarEnBD)
 
-    // Limpieza al cerrar
     useEffect(() => {
-        if (!isOpen) {
-            setProductId('')
-        }
-    }, [isOpen])
+    // Si está abierto y ha llegado un ID prefijado, se asigna.
+    if (isOpen && preFilledId) {
+        setProductId(preFilledId)
+    } else {
+        setProductId('')
+    }
+}, [isOpen, preFilledId])
 
     // Timer éxito
     useEffect(() => {

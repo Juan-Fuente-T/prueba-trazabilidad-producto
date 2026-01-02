@@ -33,12 +33,14 @@ export default function QuickOperationsPanel() {
                         buttonColor="bg-indigo-500 hover:bg-indigo-600"
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
+                        disabled={!targetId}
                     />
                     <GenericActionController
                         buttonText="🗑️ Borrar"
                         buttonColor="bg-rose-400 hover:bg-rose-500"
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}
+                        disabled={!targetId}
                     />
                 </div>
             </div>
