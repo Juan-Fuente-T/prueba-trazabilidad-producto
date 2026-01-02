@@ -8,6 +8,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 import ImageUpload from '@/components/ui/ImageUpload'
 import { useSaveProductToDB } from '@/hooks/useSaveProductToDB'
 import { calculateHash } from '@/utils/hashUtils'
+import { fileToBase64 } from '@/utils/fileUtils'
 
 interface RegisterProductModalProps {
   isOpen: boolean
@@ -48,6 +49,15 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
             throw new Error("❌ Error crítico: No se pudo leer el ID del producto de la Blockchain. Abortando guardado.");
           }
 
+          let finalImageString = ""
+          if (imageFile) {
+              try {
+                  finalImageString = await fileToBase64(imageFile)
+              } catch (err) {
+                  console.error("Error convirtiendo imagen", err)
+              }
+          }
+
           const payload = {
             product: {
               ...formData,
@@ -57,7 +67,7 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
               currentOwner: connectedAddress as `0x${string}`,
               timestamp: Date.now(),
               active: true,
-              imageUrl: imageFile ? URL.createObjectURL(imageFile) : ""
+              imageUrl: finalImageString
             },
             creationTxHash: txHash
           }
@@ -106,6 +116,8 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
         <div>
           <label className="block text-sm font-medium mb-1">Nombre</label>
           <input
+            id='name'
+            name='name'
             type="text"
             value={formData.name}
             onChange={handleChange}
@@ -117,6 +129,8 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
         <div>
           <label className="block text-sm font-medium mb-1">Cantidad</label>
           <input
+            id='quantity'
+            name='quantity'
             type="number"
             value={formData.quantity}
             onChange={handleChange}
@@ -130,7 +144,7 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
           <label className="block text-sm font-medium mb-1">Descripción</label>
           <textarea
             id='description'
-            name="textarea"
+            name='description'
             rows={4}
             cols={12}
             value={formData.description}
@@ -147,7 +161,7 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
         {/* A. Error Blockchain */}
         {blockchainError && (
           <p className="text-red-500 text-sm bg-red-50 p-2 rounded text-center border border-red-200">
-            ❌ Error Blockchain: {blockchainError}
+            ❌ Error Blockchain: {blockchainError.message}
           </p>
         )}
 

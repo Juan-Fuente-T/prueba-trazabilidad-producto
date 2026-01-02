@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import TransferProductModal from './modals/TransferProductModal';
 import DeleteProductModal from './modals/DeleteProductModal';
 import { Product } from '@/types/product'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress, formatDate } from '@/utils/formatters'
 
 interface productCardProps {
     productId?: bigint;
@@ -18,14 +18,6 @@ export default function ProductCard({ productId, product, onClose }: productCard
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const isOwner = address && product.currentOwner && address.toLowerCase() === product.currentOwner.toLowerCase();
-
-    // Formateo de fecha seguro para BigInt
-    const formatDate = (timestamp: bigint) => {
-        const date = new Date(Number(timestamp) * 1000);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-    }
 
     const handleCopy = (text: string) => {
         if (navigator.clipboard && window.isSecureContext) {
