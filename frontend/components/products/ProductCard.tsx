@@ -4,22 +4,16 @@ import { useAccount } from 'wagmi';
 // Asegúrate de que las rutas a tus modales sean correctas
 import TransferProductModal from './modals/TransferProductModal';
 import DeleteProductModal from './modals/DeleteProductModal';
+import { Product } from '@/types/product'
+import { shortenAddress } from '@/utils/formatters'
 
-interface ProductData {
-    quantity: bigint
-    characterizationHash: `0x${string}`
-    currentOwner: `0x${string}`
-    timestamp: bigint
-    exists: boolean
-}
-
-interface Props {
+interface productCardProps {
     productId?: bigint;
-    product: ProductData;
+    product: Product;
     onClose: () => void;
 }
 
-export default function ProductCard({ productId, product, onClose }: Props) {
+export default function ProductCard({ productId, product, onClose }: productCardProps) {
     const { address } = useAccount();
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -31,12 +25,6 @@ export default function ProductCard({ productId, product, onClose }: Props) {
         return date.toLocaleDateString('es-ES', {
             year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
-    }
-
-    // Truncado visual para direccion del user
-    const truncate = (str: string) => {
-        if (!str || str.length < 10) return str;
-        return `${str.substring(0, 6)}...${str.substring(str.length - 4)}`;
     }
 
     const handleCopy = (text: string) => {
@@ -98,11 +86,11 @@ export default function ProductCard({ productId, product, onClose }: Props) {
                     {/* Fila de Datos: Propietario */}
                     <div className={`p-3 sm:p-4 rounded-lg border ${isOwner ? 'bg-indigo-50 border-indigo-100' : 'bg-blue-50 border-blue-100'}`}>
                         <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isOwner ? 'text-indigo-600' : 'text-blue-500'}`}>
-                            {isOwner ? 'Tu Dirección (Eres el Propietario)' : 'Propietario Actual'}
+                            {isOwner ? 'Eres el Propietario' : 'Propietario Actual'}
                         </p>
                         <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-mono text-sm sm:text-base font-medium break-all text-stone-800">
-                                {truncate(product.currentOwner)}
+                                {shortenAddress(product.currentOwner)}
                             </p>
                             <a
                                 href={`https://sepolia.etherscan.io/address/${product.currentOwner}`}
@@ -117,7 +105,7 @@ export default function ProductCard({ productId, product, onClose }: Props) {
 
                     {/* Fila de Datos: Hash */}
                     <div>
-                        <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Hash de Caracterización</p>
+                        <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Hash de caracterización de producto</p>
                         <div className="flex items-center gap-2 bg-stone-100 p-3 rounded border border-stone-200">
                             {/* break-all: Fundamental para que el hash parta la línea en pantallas estrechas */}
                             <span className="font-mono text-xs text-stone-600 break-all flex-1">
