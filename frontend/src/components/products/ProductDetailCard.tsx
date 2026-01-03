@@ -1,10 +1,13 @@
 'use client'
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
-import TransferProductModal from '@/components/products/modals/TransferProductModal'; // Ajusta rutas
-import DeleteProductModal from '@/components/products/modals/DeleteProductModal';   // Ajusta rutas
+import TransferProductModal from '@/components/products/modals/TransferProductModal';
+import DeleteProductModal from '@/components/products/modals/DeleteProductModal';
+import useGetEventListFromDB from '@/hooks/useGetEventListFromDB';
+import ProductHistory from '@/components/products/history/ProductHistory';
 import { ProductDB } from '@/types/product'
 import { shortenAddress, formatDate } from '@/utils/formatters'
+import { getRoleName } from '@/utils/roleUtils'
 
 interface ProductDetailProps {
     product: ProductDB;
@@ -14,6 +17,7 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
     const { address } = useAccount();
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const { eventListDB } = useGetEventListFromDB(product.blockchainId.toString());
 
     // Verifica si es el dueño comparando direcciones
     const isOwner = address && product?.currentOwner &&
@@ -24,7 +28,7 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
             navigator.clipboard.writeText(text).then(() => alert("Hash copiado!"));
         }
     }
-    console.log("PRODUCTO", product)
+
     return (
         <div className="max-w-5xl mx-auto animate-fade-in-up pb-20">
 
@@ -37,6 +41,9 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                             <div className="flex items-center gap-3 mb-2">
                                 <span className={`text-xs font-bold px-2 py-1 rounded shadow-sm ${product?.active ? 'bg-emerald-500' : 'bg-red-500'}`}>
                                     {product?.active ? 'ACTIVO' : 'INACTIVO'}
+                                </span>
+                                <span className="text-lg font-bold text-stone-100">
+                                    {getRoleName(product.currentOwner)}
                                 </span>
                                 {isOwner && (
                                     <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded shadow-sm border border-amber-500">
@@ -141,6 +148,7 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                         )}
                     </div>
                 </div>
+                <ProductHistory events={eventListDB} />
             </div>
 
             {/* MODALES OCULTOS */}
