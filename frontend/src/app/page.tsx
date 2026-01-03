@@ -7,10 +7,12 @@ import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
 import useGetProductListFromDB from '@/hooks/useGetProductListFromDB'
+import { useAccount } from 'wagmi'
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const { productListDB, isLoading, error } = useGetProductListFromDB()
+ const { isConnected } = useAccount()
 
   return (
     <main className="min-h-screen bg-stone-50 pb-20 mt-8 md:mt-20">
@@ -34,11 +36,20 @@ export default function Home() {
             >
               ＋ Nuevo Producto
             </button> */}
-            <GenericActionController
-            buttonText="＋ Nuevo Producto"
+
+            {!isConnected &&
+            <div className="flex flex-col items-center mb-6">
+              <GenericActionController
+                buttonText="＋ Nuevo Producto"
                 buttonColor="bg-emerald-600 hover:bg-emerald-700"
                 ModalComponent={RegisterProductModal}
-            />
+                disabled={true}
+              />
+                <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
+                  Conecta tu wallet para operar
+                </span>
+        </div>
+            }
           </div>
         </div>
 

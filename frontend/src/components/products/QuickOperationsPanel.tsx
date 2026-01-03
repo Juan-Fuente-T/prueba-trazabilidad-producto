@@ -5,9 +5,11 @@ import { useState } from 'react'
 import TransferProductModal from '@/components/products/modals/TransferProductModal'
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
+import { useAccount } from 'wagmi'
 
 export default function QuickOperationsPanel() {
     const [targetId, setTargetId] = useState('')
+    const { isConnected } = useAccount()
 
     return (
         <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm mb-8">
@@ -34,15 +36,20 @@ export default function QuickOperationsPanel() {
                         buttonColor="bg-indigo-500 hover:bg-indigo-600"
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
-                        disabled={!targetId}
+                        disabled={!targetId || !isConnected}
                     />
                     <GenericActionController
                         buttonText="🗑️ Borrar"
                         buttonColor="bg-rose-400 hover:bg-rose-500"
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}
-                        disabled={!targetId}
+                        disabled={!targetId || !isConnected}
                     />
+                    {!isConnected &&
+                        <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
+                            Conecta tu wallet para operar
+                        </span>
+                    }
                 </div>
             </div>
         </div>

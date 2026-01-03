@@ -2,11 +2,22 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Image from 'next/image'
+import { useConnect, useAccount } from 'wagmi'
 
 export default function Header() {
+    const { connect, connectors } = useConnect()
+    const { isConnected } = useAccount()
+
+    const handleLogin = () => {
+        // Buscamos el conector de Web3Auth entre todos los disponibles
+        const web3AuthConnector = connectors.find(c => c.id === 'web3auth')
+
+        if (web3AuthConnector) {
+            connect({ connector: web3AuthConnector })
+        }
+    }
     return (
         <header className="flex justify-between items-center w-full fixed top-0 left-0 px-4 sm:px-6 py-3 z-50 border-b border-stone-500 bg-zinc-100 backdrop-blur-sm shadow-sm h-16 sm:h-20">
-      
             {/* Logo - Izquierda (Más pequeño en móvil) */}
             <div className="flex-shrink-0">
                 <Image
@@ -30,18 +41,31 @@ export default function Header() {
                 </span>
             </div>
 
-            {/* ConnectButton - Derecha */}
-            {/* <div className="flex-shrink-0">
-                <ConnectButton
-                    showBalance={{ smallScreen: false, largeScreen: true }}
-                    accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
-                />
-            </div> */}
-            <div className="flex-shrink-0 transform scale-90 sm:scale-100 origin-right">
-                <ConnectButton
-                    showBalance={{ smallScreen: false, largeScreen: true }}
-                    accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
-                />
+            {/* ZONA DE BOTONES A LA DERECHA */}
+            <div className="flex items-center gap-3">
+
+                {/* Botón Email / Google (Solo visible si NO está conectado) */}
+                {!isConnected && (
+                    <button
+                        onClick={handleLogin}
+                        className="hidden sm:flex items-center gap-2 bg-white text-stone-700 border border-stone-200 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-50 hover:border-stone-300 hover:scale-103 transition-all shadow-sm"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-stone-400">
+                            <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                        </svg>
+                        Entrar con Email
+                    </button>
+                )}
+
+                {/* Botón RainbowKit (Siempre visible) */}
+                <div className="flex flex-shrink-0">
+                    <ConnectButton
+                        showBalance={{ smallScreen: false, largeScreen: false }} // Más limpio sin saldo
+                        accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
+                        chainStatus="icon" // Solo icono de red para ahorrar espacio
+                    />
+                </div>
+
             </div>
         </header>
     )
