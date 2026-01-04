@@ -2,7 +2,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { ProductDB } from '@/types/product'
-import { getProductListFromDB } from '@/services/getProductListFromDB'
+import { getProductListFromDB } from '@/services/productApi'
 import { getErrorMessage } from '@/utils/errorUtils'
 
 export default function useGetProductListFromDB() {

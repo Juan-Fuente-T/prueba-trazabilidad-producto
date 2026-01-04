@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { Event } from '@/types/events'
-import { getEventListFromDB } from '@/services/getEventListFromDB'
+import { getEventListFromDB } from '@/services/productApi'
 import { getErrorMessage } from '@/utils/errorUtils'
 
 export default function useGetProductListFromDB(productId: string) {

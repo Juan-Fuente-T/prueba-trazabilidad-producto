@@ -41,15 +41,15 @@ export default function HistoryCard({ event }: Props) {
                     </div>
                 ) : (
                     /* CASO 2: ES TRANSFERENCIA O BORRADO (HAY ORIGEN) */
-                    event.fromAddress && (
+                    event.from && (
                         <div className="w-full flex justify-between items-center px-2">
                             <span className="text-[9px] text-stone-700">De:</span>
                             <div className="text-right">
                                 <span className="block text-[10px] font-bold text-stone-800">
-                                    {getRoleName(event.fromAddress)}
+                                    {getRoleName(event.from)}
                                 </span>
                                 <span className="block text-[9px] font-mono text-stone-700">
-                                    {shortenAddress(event.fromAddress)}
+                                    {shortenAddress(event.from)}
                                 </span>
                             </div>
                         </div>
@@ -62,15 +62,15 @@ export default function HistoryCard({ event }: Props) {
                 )}
 
                 {/* DESTINO */}
-                {event.toAddress && (
+                {event.to && (
                     <div className="w-full flex justify-between items-center px-2 bg-stone-50 rounded py-1 mt-1">
                         <span className="text-[9px] text-stone-700">A:</span>
                         <div className="text-right">
                             <span className="block text-[10px] font-bold text-emerald-700">
-                                {getRoleName(event.toAddress)}
+                                {getRoleName(event.to)}
                             </span>
                             <span className="block text-[9px] font-mono text-stone-700">
-                                {shortenAddress(event.toAddress)}
+                                {shortenAddress(event.to)}
                             </span>
                         </div>
                     </div>

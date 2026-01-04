@@ -23,3 +23,16 @@ export interface ProductPayload {
     product: Omit<ProductDB, 'id' | '_id' | 'blockchainId'> & { blockchainId: number }; // Producto sin ID de mongo
     creationTxHash: string;
 }
+
+export interface TransferProductPayload {
+    blockchainId: number;
+    txHash: string;
+    newOwnerAddress: string;
+    expectedProductHash: string;
+}
+
+export interface DeleteProductPayload {
+    blockchainId: number;
+    txHash: string;
+    expectedProductHash: string;
+}

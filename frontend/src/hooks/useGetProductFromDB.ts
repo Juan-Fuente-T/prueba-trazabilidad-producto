@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { ProductDB } from '@/types/product'
-import { getProductFromDB } from '@/services/getProductFromDB'
+import { getProductFromDB } from '@/services/productApi'
 
 export function useGetProductFromDB(productId?: string | null ) {
 

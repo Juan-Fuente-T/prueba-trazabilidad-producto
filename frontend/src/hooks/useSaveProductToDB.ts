@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { saveProductToDB } from '@/services/saveProductToDB'
+import { saveProductToDB } from '@/services/productApi'
 import { ProductPayload } from '@/types/product'
 import { getErrorMessage } from '@/utils/errorUtils'
 

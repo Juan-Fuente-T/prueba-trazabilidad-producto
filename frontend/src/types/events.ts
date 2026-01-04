@@ -1,10 +1,10 @@
 export interface Event {
     id: string
-    productBlockchainId: number
-    transactionHash: string
+    blockchainId: number
     productHash: string
-    fromAddress: string
-    toAddress: string
+    txHash: string
+    from: string
+    to: string
     type: TypeEvent
     timestamp: number
 }
