@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
-import { useGetProduct } from '@/hooks/useGetProduct'
-import { useDeleteProduct } from '@/hooks/useDeleteProduct'
-import { useDeleteProductToDB } from '@/hooks/useDeleteProductToDB'
+import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
+import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
+import { useDeleteProduct } from '@/hooks/blockchain/useDeleteProduct'
+import { useDeleteProductToDB } from '@/hooks/api/useDeleteProductToDB'
 
 export const useProductDeleteLogic = (onClose: () => void) => {
 // export const useProductDeleteLogic = () => {

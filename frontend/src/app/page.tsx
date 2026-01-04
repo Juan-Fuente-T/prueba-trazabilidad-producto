@@ -6,7 +6,7 @@ import ProductList from '@/components/products/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
-import useGetProductListFromDB from '@/hooks/useGetProductListFromDB'
+import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB'
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)

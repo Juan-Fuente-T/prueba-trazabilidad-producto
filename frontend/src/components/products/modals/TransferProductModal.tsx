@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
 import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButtons'
-import { useProductTransferLogic } from '@/hooks/useProductTransferLogic'
+import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic'
 
 interface TransferProductModalProps {
     isOpen: boolean

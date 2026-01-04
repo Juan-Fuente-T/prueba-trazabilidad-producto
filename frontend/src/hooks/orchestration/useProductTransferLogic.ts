@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
-import { useGetProduct } from '@/hooks/useGetProduct'
-import { useTransferProduct } from '@/hooks/useTransferProduct'
-import { useTransferProductToDB } from '@/hooks/useTransferProductToDB'
+import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
+import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
+import { useTransferProduct } from '@/hooks/blockchain/useTransferProduct'
+import { useTransferProductToDB } from '@/hooks/api/useTransferProductToDB'
 
 // export const useProductTransferLogic = (onClose: () => void) => {
 export const useProductTransferLogic = () => {

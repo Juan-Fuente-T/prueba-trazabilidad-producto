@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 // Suponemos que tienes un hook useProductEvents, si no, usa un useEffect normal para simular
 // import { useProductEvents } from '@/hooks/useProductEvents'
-import { useProductEvents } from '@/hooks/useProductEvents'
+import { useProductEvents } from '@/hooks/blockchain/useProductEvents'
 
 
 interface Notification {

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
 import ImageUpload from '@/components/ui/ImageUpload'
-import { useProductCreationLogic } from '@/hooks/useProductCreationLogic'
+import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreationLogic'
 
 interface RegisterProductModalProps {
   isOpen: boolean

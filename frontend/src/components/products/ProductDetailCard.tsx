@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import TransferProductModal from '@/components/products/modals/TransferProductModal';
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal';
-import useGetEventListFromDB from '@/hooks/useGetEventListFromDB';
+import useGetEventListFromDB from '@/hooks/api/useGetEventListFromDB';
 import ProductHistory from '@/components/products/history/ProductHistory';
 import { ProductDB } from '@/types/product'
 import { shortenAddress, formatDate } from '@/utils/formatters'

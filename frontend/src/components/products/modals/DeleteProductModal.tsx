@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
-import { useProductDeleteLogic } from '@/hooks/useProductDeleteLogic'
+import { useProductDeleteLogic } from '@/hooks/orchestration/useProductDeleteLogic'
 
 interface DeleteProductModalProps {
     isOpen: boolean
