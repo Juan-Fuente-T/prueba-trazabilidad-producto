@@ -1,3 +1,11 @@
+/**
+ * ℹ️ NOTA DE ARQUITECTURA: GESTIÓN DE ESTADO
+ * * Para las llamadas al Backend (MongoDB), se ha optado por utilizar `fetch` nativo
+ * combinado con `router.refresh()` de Next.js en lugar de Tanstack.
+ * * MOTIVO:
+ * Dado el volumen actual de datos y la simplicidad del CRUD, implementar una caché
+ * compleja de cliente (como TanStack Query) sería "Over-engineering".
+ */
 export const getEventListFromDB = async (productId: string) => {
     try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${productId}/history`, {
