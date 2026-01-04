@@ -24,7 +24,7 @@ export function useRegisterProduct() {
             args: [quantity, characterizationHash]
         })
     }
-    console.log('Producto registrado:', hash)
+
     return {
         registerProduct,
         isPending,        // Esperando confirmación de wallet

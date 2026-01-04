@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Modal from '../../ui/Modal'
 import { useRegisterProduct } from '@/hooks/useRegisterProduct'
 import { useAccount, useReadContract } from 'wagmi'
@@ -19,6 +20,7 @@ interface RegisterProductModalProps {
 export default function RegisterProductModal({ isOpen, onClose }: RegisterProductModalProps) {
   const [formData, setFormData] = useState({ name: '', description: '', quantity: '' })
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const router = useRouter()
 
   const { address: connectedAddress } = useAccount();
   const { registerProduct, isPending, isConfirming, isSuccess, error: blockchainError, hash: txHash } = useRegisterProduct()
@@ -44,12 +46,15 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
           const result = await updateId();
           const realIdFromContract = Number(result.data);
 
-          console.log("💎 ID leido del contrato:", realIdFromContract);
-
           if (!realIdFromContract) {
             throw new Error("❌ Error crítico: No se pudo leer el ID del producto de la Blockchain. Abortando guardado.");
           }
 
+          // TODO: OPTIMIZACIÓN DEL ALMACENAMIENTO
+          // Actualmente, las imágenes se almacenan como cadenas Base64 directamente en MongoDB para simplificar
+          // y mantener la autocontención del MVP, aunque aumenta significativamente el tamaño del documento.
+          // En PRODUCCIÓN se deben transferir las imágenes a un servicio de almacenamiento de dedicado
+          // (p. ej., AWS S3, Cloudinary) o a un almacenamiento descentralizado (IPFS) almacenando aquí solo la URL.
           let finalImageString = ""
           if (imageFile) {
               try {
@@ -73,6 +78,9 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
             creationTxHash: txHash
           }
           await saveToDB(payload)
+
+          // Refresca la lista de productos
+          router.refresh()
 
           // Espera 3 segundos para que el usuario vea el mensaje de éxito
           // const timer = setTimeout(() => {

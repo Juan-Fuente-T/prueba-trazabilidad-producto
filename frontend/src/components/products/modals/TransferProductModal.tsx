@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Modal from '../../ui/Modal'
 import { useGetProduct } from '@/hooks/useGetProduct'
 import { useTransferProduct } from '@/hooks/useTransferProduct'
-import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles'
 import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
+import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButtons'
 
 interface TransferProductModalProps {
     isOpen: boolean
@@ -17,6 +18,7 @@ interface TransferProductModalProps {
 export default function TransferProductModal({ isOpen, onClose, preFilledId }: TransferProductModalProps) {
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
+    const router = useRouter()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
@@ -36,6 +38,22 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId }: T
             setProductId('')
         }
     }, [isOpen, preFilledId])
+
+    useEffect(() => {
+        if (isSuccess) {
+            router.refresh() // Refrescamos la lista
+        }
+    }, [isSuccess])
+    // useEffect(() => {
+    //     if (isSuccess) {
+    //         router.refresh() // Refrescamos la lista
+    //         const timer = setTimeout(() => {
+    //             setNewOwner('') // Limpiamos el form
+    //             onClose()
+    //         }, 2500)
+    //         return () => clearTimeout(timer)
+    //     }
+    // }, [isSuccess, onClose])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -74,35 +92,10 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId }: T
                     minHeight="130px"
                 />
                 {/* SELLECCION ROL */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Nuevo Destino</label>
-                    <div className="flex flex-col md:flex-row gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.MAYORISTA || '')}
-                            disabled={!isOwner}
-                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            🏭 Mayorista
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.TRANSPORTISTA || '')}
-                            disabled={!isOwner}
-                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            🚚 Transportista
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setNewOwner(SUPPLY_CHAIN_ADDRESSES.PUNTO_VENTA || '')}
-                            disabled={!isOwner}
-                            className="flex-1 border rounded p-2 text-sm hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            🏪 Tienda
-                        </button>
-                    </div>
-                </div>
+                <RoleSelectorButtons
+                    isOwner={!!isOwner}
+                    onSelect={(addr) => setNewOwner(addr)}
+                />
 
                 {/* INPUT MANUAL DE ADDRESS*/}
                 <input

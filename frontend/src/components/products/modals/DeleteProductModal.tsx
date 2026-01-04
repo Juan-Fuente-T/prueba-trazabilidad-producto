@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Modal from '../../ui/Modal'
 import { useGetProduct } from '@/hooks/useGetProduct'
 import { useDeleteProduct } from '@/hooks/useDeleteProduct'
@@ -15,6 +16,7 @@ interface DeleteProductModalProps {
 
 export default function DeleteProductModal({ isOpen, onClose, preFilledId }: DeleteProductModalProps) {
     const [productId, setProductId] = useState('')
+    const router = useRouter()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
         productId && productId !== '' ? BigInt(productId) : undefined
@@ -37,6 +39,7 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId }: Del
     // Timer éxito
     useEffect(() => {
         if (isSuccess) {
+            router.refresh()
             const timer = setTimeout(() => onClose(), 3000)
             return () => clearTimeout(timer)
         }
