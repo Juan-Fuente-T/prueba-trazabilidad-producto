@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 ;import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.LocalDateTime;
-
 @Data
 @Document(collection = "product_events")
 public class ProductEvent {
@@ -37,5 +34,5 @@ public class ProductEvent {
     private EventType type; // CREATED, TRANSFERRED...
 
     @NotNull(message = "La fecha del evento es obligatoria")
-    private LocalDateTime timestamp;
+    private Long timestamp;
 }

@@ -1,4 +1,4 @@
-package com.juanfuente.trazabilidad_producto_blockchain.DTOs.response;
+package com.juanfuente.trazabilidad_producto_blockchain.DTOs.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

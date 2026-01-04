@@ -1,5 +1,6 @@
 package com.juanfuente.trazabilidad_producto_blockchain.service;
 
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.response.ProductResponse;
 import com.juanfuente.trazabilidad_producto_blockchain.model.Product;
 import com.juanfuente.trazabilidad_producto_blockchain.model.ProductEvent;
 import com.juanfuente.trazabilidad_producto_blockchain.model.EventType;
@@ -31,7 +32,7 @@ public class ProductService {
      * @return El producto guardado con su ID interno de MongoDB generado.
      */
     @Transactional
-    public Product registerProduct(Product product, String creationTxHash) {
+    public ProductResponse registerProduct(Product product, String creationTxHash) {
         if (productRepository.existsByBlockchainId(product.getBlockchainId())) {
             throw new RuntimeException("Error: El producto con ID " + product.getBlockchainId() + " ya existe en la BD.");
         }
@@ -39,11 +40,11 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         logEvent(product, creationTxHash,
-                "0x0000000000000000000000000000000000000000", // From (Null)
-                product.getCurrentOwner(),                    // To
+                "0x0000000000000000000000000000000000000000",
+                product.getCurrentOwner(),
                 EventType.CREATED);
 
-        return savedProduct;
+        return ProductResponse.fromEntity(savedProduct);
     }
 
     /**
@@ -58,22 +59,25 @@ public class ProductService {
      * @param blockchainId El ID numérico del producto en el Smart Contract.
      * @param txHash El hash de la transacción de transferencia confirmada en Ethereum.
      * @param newOwnerAddress La dirección (0x...) del nuevo propietario.
-     * @param expectedHash El hash de caracterización actual para validar la integridad antes de modificar.
+     * @param expectedProductHash El hash de caracterización actual para validar la integridad antes de modificar.
      * @throws RuntimeException Si el producto no existe o el hash no coincide.
      */
     @Transactional
-    public void transferProduct(Long blockchainId, String txHash, String newOwnerAddress, String expectedHash) {
+    public ProductResponse transferProduct(Long blockchainId, String txHash, String newOwnerAddress, String expectedProductHash) {
         Product product = getProductOrThrow(blockchainId);
 
-        if (!product.getCharacterizationHash().equals(expectedHash)) {
+        if (!product.getCharacterizationHash().equals(expectedProductHash)) {
             throw new RuntimeException("ALERTA DE SEGURIDAD: El hash del producto no coincide. Datos desincronizados.");
         }
 
         String oldOwner = product.getCurrentOwner();
         product.setCurrentOwner(newOwnerAddress);
-        productRepository.save(product);
+        Product transferredProduct = productRepository.save(product);
 
         logEvent(product, txHash, oldOwner, newOwnerAddress, EventType.TRANSFERRED);
+
+        //Convierte la Entidad a DTO antes de devolverla
+        return ProductResponse.fromEntity(transferredProduct);
     }
 
     /**
@@ -87,24 +91,26 @@ public class ProductService {
      *
      * @param blockchainId El ID del producto a eliminar.
      * @param txHash El hash de la transacción de borrado (burn) en Blockchain.
-     * @param expectedHash El hash de seguridad para confirmar que se borra el activo correcto.
+     * @param expectedProductHash El hash de seguridad para confirmar que se borra el activo correcto.
      * @throws RuntimeException Si hay inconsistencia de datos o el producto no se encuentra.
      */
     @Transactional
-    public void deleteProduct(Long blockchainId, String txHash, String expectedHash) {
+    public ProductResponse deleteProduct(Long blockchainId, String txHash, String expectedProductHash) {
         Product product = getProductOrThrow(blockchainId);
 
-        if (!product.getCharacterizationHash().equals(expectedHash)) {
+        if (!product.getCharacterizationHash().equals(expectedProductHash)) {
             throw new RuntimeException("ALERTA DE SEGURIDAD: El hash del producto no coincide. Datos desincronizados.");
         }
 
         // 1. Actualiza estado (Soft Delete)
         product.setActive(false);
-        productRepository.save(product);
+        Product deletedProduct = productRepository.save(product);
 
         logEvent(product, txHash, product.getCurrentOwner(),
                 "0x0000000000000000000000000000000000000000",
                 EventType.DELETED);
+
+        return ProductResponse.fromEntity(deletedProduct);
     }
 
     /**
@@ -160,7 +166,7 @@ public class ProductService {
         event.setFromAddress(from);
         event.setToAddress(to);
         event.setType(type);
-        event.setTimestamp(LocalDateTime.now());
+        event.setTimestamp(System.currentTimeMillis());
 
         eventRepository.save(event);
     }

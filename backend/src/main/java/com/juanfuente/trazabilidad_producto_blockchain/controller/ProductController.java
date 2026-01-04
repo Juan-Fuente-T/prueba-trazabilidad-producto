@@ -1,13 +1,17 @@
 package com.juanfuente.trazabilidad_producto_blockchain.controller;
 
-import com.juanfuente.trazabilidad_producto_blockchain.DTOs.response.ApiResponse;
-import com.juanfuente.trazabilidad_producto_blockchain.DTOs.request.RegisterEventRequest;
-import com.juanfuente.trazabilidad_producto_blockchain.DTOs.request.RegisterProductRequest;
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.common.ApiResponse;
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.request.RegisterProductRequest;
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.request.TransferProductRequest;
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.request.DeleteProductRequest;
+import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.response.ProductResponse;
 import com.juanfuente.trazabilidad_producto_blockchain.model.Product;
 import com.juanfuente.trazabilidad_producto_blockchain.model.ProductEvent;
 import com.juanfuente.trazabilidad_producto_blockchain.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,30 +70,27 @@ public class ProductController {
      * @return El producto persistido en base de datos.
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Product>> registerProduct(@RequestBody RegisterProductRequest request) {
-        Product savedProduct = productService.registerProduct(request.getProduct(), request.getCreationTxHash());
-        return ResponseEntity.ok(new ApiResponse<>("Producto registrado correctamente", savedProduct));
+    public ResponseEntity<ApiResponse<ProductResponse>> registerProduct(@RequestBody @Valid RegisterProductRequest request) {
+        ProductResponse savedProductResponse = productService.registerProduct(request.getProduct(), request.getCreationTxHash());
+        return ResponseEntity.ok(new ApiResponse<>("Producto registrado correctamente", savedProductResponse));
     }
 
-    /**
-     * Endpoint para notificar al Backend de eventos ocurridos en Blockchain.
-     * POST /api/products/events
-     * * Se debe llamar cada vez que el usuario realiza una acción de escritura en el contrato
-     * (Transferir, Borrar) para mantener la base de datos sincronizada.
-     * * @param request DTO con los detalles del evento (hash, from, to, type).
-     * @return Respuesta vacía indicando éxito.
-     */
-    @PostMapping("/events")
-    public ResponseEntity<ApiResponse<Void>> registerEvent(@RequestBody RegisterEventRequest request) {
-        productService.registerEvent(
-                request.getBlockchainId(),
-                request.getProductHash(),
-                request.getTxHash(),
-                request.getFrom(),
-                request.getTo(),
-                request.getType()
+    @PostMapping("/transfer")
+    public ResponseEntity<ApiResponse<ProductResponse>> transferProduct(@RequestBody @Valid TransferProductRequest request) {
+        ProductResponse transferredResponseDto = productService.transferProduct(
+                request.blockchainId(),
+                request.txHash(),
+                request.newOwnerAddress(),
+                request.expectedProductHash()
         );
-        // Devuelve mensaje de éxito pero sin datos (null)
-        return ResponseEntity.ok(new ApiResponse<>("Evento registrado y estado actualizado"));
+        return ResponseEntity.ok(new ApiResponse<>("Producto registrado correctamente", transferredResponseDto));
+    }
+    @PostMapping("/delete")
+    public ResponseEntity<ApiResponse<ProductResponse>> deleteProduct(@RequestBody @Valid DeleteProductRequest request) {
+        ProductResponse deletedResponseDto = productService.deleteProduct(
+                request.blockchainId(),
+                request.txHash(),
+                request.expectedProductHash());
+        return ResponseEntity.ok(new ApiResponse<>("Producto registrado correctamente", deletedResponseDto));
     }
 }
