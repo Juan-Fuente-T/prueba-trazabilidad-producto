@@ -1,12 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
-import { useGetProduct } from '@/hooks/useGetProduct'
-import { useDeleteProduct } from '@/hooks/useDeleteProduct'
-import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
+import { useProductDeleteLogic } from '@/hooks/useProductDeleteLogic'
 
 interface DeleteProductModalProps {
     isOpen: boolean
@@ -15,43 +12,25 @@ interface DeleteProductModalProps {
 }
 
 export default function DeleteProductModal({ isOpen, onClose, preFilledId }: DeleteProductModalProps) {
-    const [productId, setProductId] = useState('')
-    const router = useRouter()
-
-    const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
-        productId && productId !== '' ? BigInt(productId) : undefined
-    )
-    const { deleteProduct, isPending, isConfirming, isSuccess, error: deleteError } = useDeleteProduct()
-
-    // Solo llama a BD si existe el producto en blockchain
-    const idParaBuscarEnBD = product ? productId : null;
-    const { productDB, isLoading: loadingDB } = useGetProductFromDB(idParaBuscarEnBD)
+    const {
+        product,
+        productDB,
+        isOwner,
+        productId,
+        setProductId,
+        handleSubmit,
+        status,
+        errors
+    } = useProductDeleteLogic(onClose)
 
     useEffect(() => {
-    // Si está abierto y ha llegado un ID prefijado, se asigna.
-    if (isOpen && preFilledId) {
-        setProductId(preFilledId)
-    } else {
-        setProductId('')
-    }
-}, [isOpen, preFilledId])
-
-    // Timer éxito
-    useEffect(() => {
-        if (isSuccess) {
-            router.refresh()
-            const timer = setTimeout(() => onClose(), 3000)
-            return () => clearTimeout(timer)
+        // Si está abierto y ha llegado un ID prefijado, se asigna.
+        if (isOpen && preFilledId) {
+            setProductId(preFilledId)
+        } else {
+            setProductId('')
         }
-    }, [isSuccess, onClose])
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!isOwner) return // Validación dueño del producto
-        //Todo: validar que el id no se de un producto ya borrado
-        deleteProduct(BigInt(productId))
-    }
+    }, [isOpen, preFilledId])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Delete Product">
@@ -74,23 +53,23 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId }: Del
                     productId={productId}
                     product={product}
                     productDB={productDB}
-                    loadingDB={loadingDB}
-                    isLoadingBlockchain={loadingBC}
+                    loadingDB={status.loadingDB}
+                    isLoadingBlockchain={status.loadingBC}
                     isOwner={isOwner}
                     variant="default"
                     minHeight="130px"
                 />
 
                 {/* Mensajes Éxito/Error Acción */}
-                {isSuccess ? (
+                {status.isSuccess ? (
                     <p className="text-green-600 font-bold text-center bg-green-50 p-3 rounded border border-green-200">
                         🗑️ Producto eliminado correctamente.
                     </p>
                 ) : (
                     <div className="space-y-2">
-                        {(deleteError || (readError && !readError.message.includes("reverted"))) && (
+                        {(errors.deleteError || (errors.readError && !errors.readError.message.includes("reverted"))) && (
                             <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-200 break-words">
-                                Error: {deleteError?.message || readError?.message}
+                                Error: {errors.deleteError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB}
                             </p>
                         )}
                     </div>
@@ -100,9 +79,9 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId }: Del
                 <button
                     type="submit"
                     className="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
-                    disabled={!isOwner || !product || isPending || isConfirming}
+                    disabled={!isOwner || !product || status.isPending || status.isConfirming || status.isDeletingDB}
                 >
-                    {isPending || isConfirming ? 'Borrando en Blockchain...' : 'Confirmar Borrado'}
+                    {status.isPending || status.isConfirming || status.isDeletingDB? 'Borrando en Blockchain...' : 'Confirmar Borrado'}
                 </button>
             </form>
         </Modal>

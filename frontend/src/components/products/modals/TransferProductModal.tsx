@@ -1,13 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
-import { useGetProduct } from '@/hooks/useGetProduct'
-import { useTransferProduct } from '@/hooks/useTransferProduct'
-import { useGetProductFromDB } from '@/hooks/useGetProductFromDB'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
 import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButtons'
+import { useProductTransferLogic } from '@/hooks/useProductTransferLogic'
 
 interface TransferProductModalProps {
     isOpen: boolean
@@ -16,19 +13,18 @@ interface TransferProductModalProps {
 }
 
 export default function TransferProductModal({ isOpen, onClose, preFilledId }: TransferProductModalProps) {
-    const [productId, setProductId] = useState('')
-    const [newOwner, setNewOwner] = useState('')
-    const router = useRouter()
-
-    const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
-        productId && productId.trim() !== '' ? BigInt(productId) : undefined
-    )
-
-    // Solo llama a BD si existe el producto en blockchain
-    const idParaBuscarEnBD = product ? productId : null;
-    const { productDB, isLoading: loadingDB } = useGetProductFromDB(idParaBuscarEnBD)
-
-    const { transferProduct, isPending, isConfirming, isSuccess, error: writeError } = useTransferProduct()
+const {
+        product,
+        productDB,
+        isOwner,
+        productId,
+        newOwner,
+        setProductId,
+        setNewOwner,
+        handleSubmit,
+        status,
+        errors
+    } = useProductTransferLogic()
 
     useEffect(() => {
         // Si está abierto y ha llegado un ID prefijado, se asigna.
@@ -38,30 +34,6 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId }: T
             setProductId('')
         }
     }, [isOpen, preFilledId])
-
-    useEffect(() => {
-        if (isSuccess) {
-            router.refresh() // Refrescamos la lista
-        }
-    }, [isSuccess])
-    // useEffect(() => {
-    //     if (isSuccess) {
-    //         router.refresh() // Refrescamos la lista
-    //         const timer = setTimeout(() => {
-    //             setNewOwner('') // Limpiamos el form
-    //             onClose()
-    //         }, 2500)
-    //         return () => clearTimeout(timer)
-    //     }
-    // }, [isSuccess, onClose])
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!productId || !newOwner) return
-        //Todo: validar que el id no sea de un producto ya borrado
-        transferProduct(BigInt(productId), newOwner as `0x${string}`)
-    }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Transferir Producto">
@@ -85,8 +57,8 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId }: T
                     productId={productId}
                     product={product}
                     productDB={productDB}
-                    loadingDB={loadingDB}
-                    isLoadingBlockchain={loadingBC}
+                    loadingDB={status.loadingDB}
+                    isLoadingBlockchain={status.loadingBC}
                     isOwner={isOwner}
                     variant="default"
                     minHeight="130px"
@@ -109,23 +81,23 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId }: T
 
                 {/* MOSTRAR ERRORES */}
                 {/* Filtra error de lectura, "revert", que ya se esta gestionando*/}
-                {(writeError || (readError && !readError.message.includes("reverted"))) && (
+                {(errors.writeError || (errors.readError && !errors.readError.message.includes("reverted"))) && (
                     <div className="bg-red-50 p-2 rounded border border-red-200">
                         <p className="text-red-600 text-xs text-center break-words">
-                            Error: {writeError?.message || readError?.message}
+                            Error: {errors.writeError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB}
                         </p>
                     </div>
                 )}
 
-                {isSuccess && <p className="text-green-600 font-bold text-center">✅ Transferencia completada</p>}
+                {status.isSuccess && <p className="text-green-600 font-bold text-center">✅ Transferencia completada</p>}
 
                 {/* BOTÓN TRANSFERENCIA */}
                 <button
                     type="submit"
                     className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-                    disabled={!productId || !newOwner || !isOwner || isPending || isConfirming}
+                    disabled={!productId || !newOwner || !isOwner || status.isPending || status.isConfirming || status.isTransferingDB}
                 >
-                    {isPending || isConfirming ? 'Procesando...' : 'Transferir Propiedad'}
+                    {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Transferir Propiedad'}
                 </button>
 
             </form>

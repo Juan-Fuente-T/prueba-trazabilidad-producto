@@ -1,15 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
-import { useRegisterProduct } from '@/hooks/useRegisterProduct'
-import { useAccount, useReadContract } from 'wagmi'
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 import ImageUpload from '@/components/ui/ImageUpload'
-import { useSaveProductToDB } from '@/hooks/useSaveProductToDB'
-import { calculateHash } from '@/utils/hashUtils'
-import { fileToBase64 } from '@/utils/fileUtils'
+import { useProductCreationLogic } from '@/hooks/useProductCreationLogic'
 
 interface RegisterProductModalProps {
   isOpen: boolean
@@ -18,19 +12,17 @@ interface RegisterProductModalProps {
 }
 
 export default function RegisterProductModal({ isOpen, onClose }: RegisterProductModalProps) {
-  const [formData, setFormData] = useState({ name: '', description: '', quantity: '' })
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const router = useRouter()
-
-  const { address: connectedAddress } = useAccount();
-  const { registerProduct, isPending, isConfirming, isSuccess, error: blockchainError, hash: txHash } = useRegisterProduct()
-  const { saveToDB, isSavingDB, errorDB, resetDBStatus } = useSaveProductToDB()
-
-  const { refetch: updateId } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'productId',
-  })
+const {
+    formData,
+    imageFile,
+    setImageFile,
+    handleChange,
+    handleSubmit,
+    resetForm,
+    status,
+    errors
+  // } = useProductCreationLogic(onClose)
+  } = useProductCreationLogic()
 
   // Limpieza al cerrar
   useEffect(() => {
@@ -38,86 +30,6 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
       resetForm();
     }
   }, [isOpen])
-
-  useEffect(() => {
-    if (isSuccess && txHash && !isSavingDB) {
-      const saveInBackend = async () => {
-        try {
-          const result = await updateId();
-          const realIdFromContract = Number(result.data);
-
-          if (!realIdFromContract) {
-            throw new Error("❌ Error crítico: No se pudo leer el ID del producto de la Blockchain. Abortando guardado.");
-          }
-
-          // TODO: OPTIMIZACIÓN DEL ALMACENAMIENTO
-          // Actualmente, las imágenes se almacenan como cadenas Base64 directamente en MongoDB para simplificar
-          // y mantener la autocontención del MVP, aunque aumenta significativamente el tamaño del documento.
-          // En PRODUCCIÓN se deben transferir las imágenes a un servicio de almacenamiento de dedicado
-          // (p. ej., AWS S3, Cloudinary) o a un almacenamiento descentralizado (IPFS) almacenando aquí solo la URL.
-          let finalImageString = ""
-          if (imageFile) {
-              try {
-                  finalImageString = await fileToBase64(imageFile)
-              } catch (err) {
-                  console.error("Error convirtiendo imagen", err)
-              }
-          }
-
-          const payload = {
-            product: {
-              ...formData,
-              quantity: Number(formData.quantity),
-              blockchainId: realIdFromContract,
-              characterizationHash: calculateHash(formData.name, formData.description),
-              currentOwner: connectedAddress as `0x${string}`,
-              timestamp: Date.now(),
-              active: true,
-              imageUrl: finalImageString
-            },
-            creationTxHash: txHash
-          }
-          await saveToDB(payload)
-
-          // Refresca la lista de productos
-          router.refresh()
-
-          // Espera 3 segundos para que el usuario vea el mensaje de éxito
-          // const timer = setTimeout(() => {
-          //   onClose()
-          //   resetForm()
-          // }, 3000)
-
-          // return () => clearTimeout(timer) // Limpia el timer si el componente se desmonta
-        } catch (e) {
-          console.error("Error crítico orquestación:", e)
-          // Aquí se podría usar un toast
-        }
-      }
-      saveInBackend()
-    }
-  }, [isSuccess, txHash])
-
-  const resetForm = () => {
-    setFormData({ name: '', description: '', quantity: '' })
-    setImageFile(null)
-    resetDBStatus()
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const productHash = calculateHash(formData.name, formData.description)
-
-    // console.log('Enviando a Blockchain:', { quantity, productHash })
-    registerProduct(BigInt(formData.quantity), productHash)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    // Copia todo lo anterior y sobreescribe solo ese campo
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-  const isGlobalLoading = isPending || isConfirming || isSavingDB
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Register Product">
@@ -168,38 +80,38 @@ export default function RegisterProductModal({ isOpen, onClose }: RegisterProduc
 
         {/* --- GESTIÓN DE ERRORES VISUAL --- */}
         {/* A. Error Blockchain */}
-        {blockchainError && (
+        {errors.blockchainError && (
           <p className="text-red-500 text-sm bg-red-50 p-2 rounded text-center border border-red-200">
-            ❌ Error Blockchain: {blockchainError.message}
+            ❌ Error Blockchain: {errors.blockchainError.message}
           </p>
         )}
 
         {/* B. Error Base de Datos (Caso Limbo) */}
-        {isSuccess && errorDB && (
+        {status.isSuccess && errors.errorDB && (
           <div className="bg-orange-50 border border-orange-200 p-3 rounded text-center">
             <p className="text-orange-700 font-bold text-sm">⚠️ Guardado en Blockchain, pero falló BD</p>
-            <p className="text-orange-600 text-xs mt-1">{errorDB}</p>
+            <p className="text-orange-600 text-xs mt-1">{errors.errorDB}</p>
           </div>
         )}
 
         {/* C. Éxito Total */}
-        {isSuccess && !errorDB && !isSavingDB && (
+        {status.isSuccess && !errors.errorDB && !status.isSavingDB && (
           <p className="text-green-600 font-bold text-center text-lg animate-pulse">
             ✅ ¡Producto Creado Exitosamente!
           </p>
         )}
 
         {/* BOTÓN DE REGISTER */}
-        {isPending || isConfirming ? (
+        {status.isPending || status.isConfirming ? (
           <p className="text-blue-500 mt-2">Transacción en proceso...</p>
         ) : (
-          !isSuccess && ( // Opcional: Ocultar botón si ya hubo éxito para que no le den dos veces
+          !status.isSuccess && ( // Opcional: Ocultar botón si ya hubo éxito para que no le den dos veces
             <button
               type="submit"
               className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!formData.quantity || !formData.name || isGlobalLoading}
+              disabled={!formData.quantity || !formData.name || status.isGlobalLoading}
             >
-              {isGlobalLoading ? 'Procesando...' : 'Crear Producto'}
+              {status.isGlobalLoading ? 'Procesando...' : 'Crear Producto'}
             </button>
           )
         )}
