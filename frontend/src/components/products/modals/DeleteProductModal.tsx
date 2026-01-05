@@ -9,9 +9,10 @@ interface DeleteProductModalProps {
     isOpen: boolean
     onClose: () => void
     preFilledId?: string
+    onSuccess: () => void
 }
 
-export default function DeleteProductModal({ isOpen, onClose, preFilledId }: DeleteProductModalProps) {
+export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuccess }: DeleteProductModalProps) {
     const {
         product,
         productDB,
@@ -31,6 +32,18 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId }: Del
             setProductId('')
         }
     }, [isOpen, preFilledId])
+
+    useEffect(() => {
+        if (status.isSuccess && !status.isDeletingDB) {
+            //  const timer = setTimeout(() => {
+            //     onSuccess()
+            //     onClose()
+            // }, 2000)
+            // return () => clearTimeout(timer)
+            onSuccess()
+        }
+    // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
+    }, [status.isSuccess, status.isDeletingDB, onSuccess])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Delete Product">
@@ -69,20 +82,21 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId }: Del
                     <div className="space-y-2">
                         {(errors.deleteError || (errors.readError && !errors.readError.message.includes("reverted"))) && (
                             <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-200 break-words">
-                                Error: {errors.deleteError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB}
+                                {/* Error: {errors.deleteError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB} */}
+                                Error: { errors.readError?.message || errors.readErrorDB || errors.errorDB}
                             </p>
                         )}
                     </div>
                 )}
 
                 {/* Botón borrado*/}
-                <button
+                {!status.isSuccess && <button
                     type="submit"
                     className="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
                     disabled={!isOwner || !product || status.isPending || status.isConfirming || status.isDeletingDB}
                 >
                     {status.isPending || status.isConfirming || status.isDeletingDB? 'Borrando en Blockchain...' : 'Confirmar Borrado'}
-                </button>
+                </button>}
             </form>
         </Modal>
     )

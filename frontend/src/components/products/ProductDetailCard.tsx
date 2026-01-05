@@ -3,31 +3,34 @@ import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import TransferProductModal from '@/components/products/modals/TransferProductModal';
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal';
-import useGetEventListFromDB from '@/hooks/api/useGetEventListFromDB';
+import { Event } from '@/types/events';
+import { ProductDB } from '@/types/product';
 import ProductHistory from '@/components/products/history/ProductHistory';
-import { ProductDB } from '@/types/product'
 import { shortenAddress, formatDate } from '@/utils/formatters'
 import { getRoleName } from '@/utils/roleUtils'
+// import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic';
 
 interface ProductDetailProps {
-    product: ProductDB;
+    productDB: ProductDB;
+    eventListDB: Event[];
+    onDataUpdate: () => void;
 }
 
-export default function ProductDetailCard({ product }: ProductDetailProps) {
+export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate }: ProductDetailProps) {
     const { address } = useAccount();
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    const { eventListDB } = useGetEventListFromDB(product.blockchainId.toString());
 
     // Verifica si es el dueño comparando direcciones
-    const isOwner = address && product?.currentOwner &&
-        address.toLowerCase() === product?.currentOwner.toLowerCase();
+    const isOwner = address && productDB?.currentOwner &&
+        address.toLowerCase() === productDB?.currentOwner.toLowerCase();
 
     const handleCopy = (text: string) => {
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(text).then(() => alert("Hash copiado!"));
         }
     }
+    // const { status } = useProductTransferLogic(closeModal)
 
     return (
         <div className="max-w-5xl mx-auto animate-fade-in-up pb-20">
@@ -39,11 +42,11 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <span className={`text-xs font-bold px-2 py-1 rounded shadow-sm ${product?.active ? 'bg-emerald-500' : 'bg-red-500'}`}>
-                                    {product?.active ? 'ACTIVO' : 'INACTIVO'}
+                                <span className={`text-xs font-bold px-2 py-1 rounded shadow-sm ${productDB?.active ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                                    {productDB?.active ? 'ACTIVO' : 'INACTIVO'}
                                 </span>
                                 <span className="text-lg font-bold text-stone-100">
-                                    {getRoleName(product.currentOwner)}
+                                    {getRoleName(productDB.currentOwner)}
                                 </span>
                                 {isOwner && (
                                     <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded shadow-sm border border-amber-500">
@@ -51,13 +54,13 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                                     </span>
                                 )}
                             </div>
-                            <h1 className="text-3xl sm:text-4xl font-bold">Producto #{product?.blockchainId}</h1>
-                            <h2 className="text-xl text-white/80 mt-1">{product?.name}</h2>
+                            <h1 className="text-3xl sm:text-4xl font-bold">Producto #{productDB?.blockchainId}</h1>
+                            <h2 className="text-xl text-white/80 mt-1">{productDB?.name}</h2>
                         </div>
                         <div className="text-right hidden sm:block">
                             <p className="text-white/60 text-sm">Registrado el</p>
-                            {product?.timestamp ? (
-                                <p className="font-mono">{formatDate(BigInt(product.timestamp))}</p>
+                            {productDB?.timestamp ? (
+                                <p className="font-mono">{formatDate(BigInt(productDB.timestamp))}</p>
                             ) : (
                                 <p className="font-mono text-stone-400">-</p>
                             )}
@@ -70,11 +73,11 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
 
                     {/* COLUMNA IZQUIERDA: IMAGEN */}
                     <div className="bg-stone-100 p-6 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-stone-200 min-h-[400px]">
-                        {product?.imageUrl ? (
+                        {productDB?.imageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                                src={product.imageUrl}
-                                alt={product.name}
+                                src={productDB.imageUrl}
+                                alt={productDB.name}
                                 className="max-w-full max-h-[500px] object-contain rounded-lg shadow-sm"
                             />
                         ) : (
@@ -92,7 +95,7 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                         <div>
                             <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wide mb-2">Descripción</h3>
                             <p className="text-stone-700 leading-relaxed text-lg">
-                                {product?.description}
+                                {productDB?.description}
                             </p>
                         </div>
 
@@ -100,13 +103,13 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
                                 <p className="text-xs font-bold text-stone-400 uppercase">Cantidad</p>
-                                <p className="text-2xl font-bold text-stone-800">{Number(product?.quantity)} uds.</p>
+                                <p className="text-2xl font-bold text-stone-800">{Number(productDB?.quantity)} uds.</p>
                             </div>
                             <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
                                 <p className="text-xs font-bold text-stone-400 uppercase">Dueño Actual</p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className="font-mono text-indigo-600 font-medium">
-                                        {shortenAddress(product?.currentOwner)}
+                                        {shortenAddress(productDB?.currentOwner)}
                                     </span>
                                 </div>
                             </div>
@@ -117,10 +120,10 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                             <p className="text-xs font-bold text-stone-400 uppercase mb-2">Hash de Integridad (Blockchain)</p>
                             <div className="flex items-center gap-2 bg-stone-50 p-3 rounded border border-stone-200">
                                 <code className="text-xs text-stone-600 break-all flex-1 font-mono">
-                                    {product?.characterizationHash}
+                                    {productDB?.characterizationHash}
                                 </code>
                                 <button
-                                    onClick={() => handleCopy(product?.characterizationHash ? product.characterizationHash : '')}
+                                    onClick={() => handleCopy(productDB?.characterizationHash ? productDB.characterizationHash : '')}
                                     className="p-2 hover:bg-stone-200 rounded text-stone-500"
                                     title="Copiar"
                                 >
@@ -130,7 +133,7 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
                         </div>
 
                         {/* ACCIONES (Solo dueño) */}
-                        {isOwner && product.active && (
+                        {isOwner && productDB.active && (
                             <div className="grid grid-cols-2 gap-4 mt-4">
                                 <button
                                     onClick={() => setIsTransferOpen(true)}
@@ -152,12 +155,8 @@ export default function ProductDetailCard({ product }: ProductDetailProps) {
             </div>
 
             {/* MODALES OCULTOS */}
-            {isOwner && (
-            <>
-                <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={product.blockchainId.toString()} />
-                <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={product.blockchainId.toString()}/>
-            </>
-            )}
+            <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={productDB.blockchainId.toString()} onSuccess={() => {onDataUpdate()}} />
+            <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={productDB.blockchainId.toString()} onSuccess={() => {onDataUpdate()}}/>
         </div>
     )
 }
