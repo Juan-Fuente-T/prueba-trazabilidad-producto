@@ -1,6 +1,5 @@
 // src/app/page.tsx
 'use client'
-import { useState } from 'react'
 import Header from '@/components/layout/Header'
 import ProductList from '@/components/products/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
@@ -8,15 +7,13 @@ import RegisterProductModal from '@/components/products/modals/RegisterProductMo
 import GenericActionController from '@/components/ui/GenericActionController'
 import { useProductDashboardLogic } from '@/hooks/orchestration/useProductDashboardLogic'
 import { useAccount } from 'wagmi'
-import { ProductDB } from '@/types/product'
 
 export default function Home() {
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const { isConnected } = useAccount()
   const {
     productListDB,
     handleOptimisticUpdate,
-    addNewProductToState,
+    refecth,
     isLoading,
     error
   } = useProductDashboardLogic()
@@ -43,9 +40,14 @@ export default function Home() {
                   buttonText="＋ Nuevo Producto"
                   buttonColor="bg-emerald-600 hover:bg-emerald-700"
                   ModalComponent={RegisterProductModal}
-                  disabled={true}
-                  preFilledId="" // Rellenos para cumplir con la interfaz, no se usan
-                  onSuccess={() => { }}
+                  disabled={!isConnected}
+                  preFilledId="" // Relleno para cumplir con la interfaz
+                  onSuccess={() => {
+                    // espera 4 segundos a que el Backend indexe y RECARGA la lista.
+                    setTimeout(() => {
+                      refecth()
+                    }, 4000)
+                  }}
                 />
               ) : (
                 <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
@@ -72,18 +74,6 @@ export default function Home() {
         </div>
 
       </div>
-
-      <RegisterProductModal
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
-        preFilledId=""
-        onSuccess={(newProductData) => {
-          if (newProductData) {
-            addNewProductToState(newProductData as unknown as ProductDB)
-          }
-          setIsRegisterOpen(false)
-        }}
-      />
     </main>
   )
 }

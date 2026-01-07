@@ -1,30 +1,45 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Modal from '../../ui/Modal'
 import ImageUpload from '@/components/ui/ImageUpload'
 import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreationLogic'
 import { ActionModalProps } from '@/types/operations';
 
-export default function RegisterProductModal({ isOpen, onClose }: ActionModalProps) {
-const {
+export default function RegisterProductModal({ isOpen, onClose, onSuccess }: ActionModalProps) {
+  const {
     formData,
     imageFile,
+    txHash,
     setImageFile,
     handleChange,
     handleSubmit,
     resetForm,
     status,
     errors
-  // } = useProductCreationLogic(onClose)
+    // } = useProductCreationLogic(onClose)
   } = useProductCreationLogic()
+
+  //Util para evitar notificaciones duplicadas y re-renderizados de estas
+  const hasNotifiedRef = useRef(false)
 
   // Limpieza al cerrar
   useEffect(() => {
     if (!isOpen) {
+      hasNotifiedRef.current = false;
       resetForm();
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (status.isSuccess && !hasNotifiedRef.current) {
+      //  BLOQUEA la noticacion más allá de una sola vez
+      hasNotifiedRef.current = true
+      onSuccess({
+        txHash: txHash || "0xHashNoDisponible"
+      })
+    }
+  }, [status.isSuccess, txHash, onSuccess])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Register Product">
@@ -76,9 +91,12 @@ const {
         {/* --- GESTIÓN DE ERRORES VISUAL --- */}
         {/* A. Error Blockchain */}
         {errors.blockchainError && (
-          <p className="text-red-500 text-sm bg-red-50 p-2 rounded text-center border border-red-200">
-            ❌ Error Blockchain: {errors.blockchainError.message}
-          </p>
+            <div className="bg-red-50 ...">
+                {errors.blockchainError.message.includes("User denied") || errors.blockchainError.message.includes("rejected")
+                    ? "Operación cancelada por el usuario."
+                    : errors.blockchainError.message // Si es otro error, se muestra
+                }
+            </div>
         )}
 
         {/* B. Error Base de Datos (Caso Limbo) */}

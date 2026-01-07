@@ -7,13 +7,6 @@ import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButton
 import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic'
 import { ActionModalProps } from '@/types/operations';
 
-// interface TransferProductModalProps {
-//     isOpen: boolean
-//     onClose: () => void
-//     preFilledId?: string
-//     onSuccess: (newOwner?: string) => void
-// }
-
 export default function TransferProductModal({ isOpen, onClose, preFilledId, onSuccess }: ActionModalProps) {
     const {
         product,
@@ -21,6 +14,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
         isOwner,
         productId,
         newOwner,
+        txHash,
         setProductId,
         setNewOwner,
         handleSubmit,
@@ -30,6 +24,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
 
     // Hace seguimiento de la notificacion de éxito y llamar a onSuccess solo 1 vez
     const hasNotifiedRef = useRef(false)
+
     useEffect(() => {
         // Si está abierto y ha llegado un ID prefijado, se asigna.
         if (isOpen) {
@@ -51,7 +46,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
             //     onClose()
             // }, 2000)
             // return () => clearTimeout(timer)
-            onSuccess({newOwner: newOwner})
+            onSuccess({newOwner: newOwner, txHash: txHash || "0xHashNoDisponible"})
         }
         // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
     }, [status.isSuccess, status.isTransferingDB, newOwner, onSuccess])
@@ -73,7 +68,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                         required
                     />
                 </div>
-                {/* 🔥 COMPONENTE REUTILIZABLE (Modo Default/Azul) */}
+                {/* COMPONENTE REUTILIZABLE (Modo Default/Azul) */}
                 <ProductInfoCard
                     productId={productId}
                     product={product}

@@ -65,6 +65,7 @@ export const useProductTransferLogic = () => {
         isOwner,
         productId,
         newOwner,
+        txHash,
         setProductId,
         setNewOwner,
         handleSubmit,

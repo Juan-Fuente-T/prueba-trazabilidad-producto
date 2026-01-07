@@ -2,14 +2,20 @@
 // Lo que devuelve el modal de Transferencia al tener éxito
 export interface TransferSuccessData {
     newOwner: string;
+    txHash: string;
 }
 
 // Lo que devuelve el modal de Borrado
 export interface DeleteSuccessData {
     deleted: boolean;
+    txHash: string;
+}
+export interface CreateSuccessData {
+    txHash: string;
+    newProductId?: string;
 }
 
-export type OperationResult = TransferSuccessData | DeleteSuccessData;
+export type OperationResult = TransferSuccessData | DeleteSuccessData | CreateSuccessData;
 
 export type OperationResultWithID = OperationResult & { id: string };
 
@@ -17,6 +23,6 @@ export type OperationResultWithID = OperationResult & { id: string };
 export interface ActionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    preFilledId: string;
+    preFilledId?: string;
     onSuccess: (data?: OperationResult) => void;
 }

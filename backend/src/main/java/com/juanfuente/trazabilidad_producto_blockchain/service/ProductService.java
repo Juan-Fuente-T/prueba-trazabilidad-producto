@@ -106,9 +106,8 @@ public class ProductService {
         product.setActive(false);
         Product deletedProduct = productRepository.save(product);
 
-        logEvent(product, txHash, product.getCurrentOwner(),
-                "0x0000000000000000000000000000000000000000",
-                EventType.DELETED);
+        String oldOwner = product.getCurrentOwner();
+        logEvent(product, txHash, oldOwner, oldOwner, EventType.DELETED);
 
         return ProductResponse.fromEntity(deletedProduct);
     }

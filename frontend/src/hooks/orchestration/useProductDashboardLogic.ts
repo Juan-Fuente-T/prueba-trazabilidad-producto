@@ -4,11 +4,9 @@ import { OperationResultWithID } from '@/types/operations'
 import { ProductDB } from '@/types/product'
 import { Event } from '@/types/events'
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-
 export function useProductDashboardLogic() {
     console.log("RENDERIZANDO...", useProductDashboardLogic)
-    const { productListDB, setProductListDB, isLoading, error } = useGetProductListFromDB()
+    const { productListDB, setProductListDB, isLoading, error, refecth} = useGetProductListFromDB()
 
     // Confirmamos los datos actuales desde el evento en blockchai
     const handleBlockchainEvent = (data: Partial<Event>) => {
@@ -16,12 +14,12 @@ export function useProductDashboardLogic() {
         setProductListDB((prevList: ProductDB[]) => {
             return prevList.map(product => {
                 // Busca si el evento corresponde al producto, asegurando el match con Number
-                if (Number(product.blockchainId) === Number(data.blockchainId)) {
+                if (Number(product.blockchainId) === Number(data.productBlockchainId)) {
 
-                    if ((data.type === 'TRANSFERRED' || data.type === 'CREATED') && data.to) {
+                    if ((data.type === 'TRANSFERRED' || data.type === 'CREATED') && data.toAddress) {
 
                         // Si el dueño visual coincide con el del evento -> VERIFICADO
-                        if (product.currentOwner?.toLowerCase() === data.to.toLowerCase()) {
+                        if (product.currentOwner?.toLowerCase() === data.toAddress.toLowerCase()) {
                             return {
                                 ...product,
                                 isVerified: true
@@ -30,7 +28,7 @@ export function useProductDashboardLogic() {
                         // Si no coincidía, actualiza a la fuerza
                         return {
                             ...product,
-                            currentOwner: data.to,
+                            currentOwner: data.toAddress,
                             isVerified: true
                         }
                     }
@@ -38,7 +36,7 @@ export function useProductDashboardLogic() {
                     if (data.type === 'DELETED') {
                         return {
                             ...product,
-                            currentOwner: ZERO_ADDRESS,
+                            currentOwner: product.currentOwner,
                             active: false,
                             isVerified: true
                         }
@@ -73,7 +71,7 @@ export function useProductDashboardLogic() {
                     if (type === 'DELETE') {
                         return {
                             ...product,
-                            currentOwner: ZERO_ADDRESS,
+                            currentOwner: product.currentOwner,
                             active: false,
                             isVerified: false
                         }
@@ -91,7 +89,8 @@ export function useProductDashboardLogic() {
     return {
         productListDB,
         handleOptimisticUpdate,
-        addNewProductToState,
+        // addNewProductToState,
+        refecth,
         isLoading,
         error
     }

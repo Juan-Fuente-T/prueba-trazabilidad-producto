@@ -108,6 +108,7 @@ export const useProductCreationLogic = () => {
     return {
         formData,
         imageFile,
+        txHash,
         setImageFile,
         handleChange,
         handleSubmit,

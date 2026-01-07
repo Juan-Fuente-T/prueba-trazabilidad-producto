@@ -4,16 +4,18 @@ import { useAccount } from 'wagmi';
 import TransferProductModal from '@/components/products/modals/TransferProductModal';
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal';
 import { Event } from '@/types/events';
+import { TransferSuccessData, DeleteSuccessData } from '@/types/operations';
 import { ProductDB } from '@/types/product';
 import ProductHistory from '@/components/products/history/ProductHistory';
 import { shortenAddress, formatDate } from '@/utils/formatters'
 import { getRoleName } from '@/utils/roleUtils'
+import { createOptimisticEvent } from '@/utils/optimisticFactory';
 // import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic';
 
 interface ProductDetailProps {
     productDB: ProductDB;
     eventListDB: Event[];
-    onDataUpdate: () => void;
+    onDataUpdate: (newOwner?: string, newEvent?: Event) => void;
 }
 
 export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate }: ProductDetailProps) {
@@ -155,8 +157,44 @@ export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate
             </div>
 
             {/* MODALES OCULTOS */}
-            <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={productDB.blockchainId.toString()} onSuccess={() => {onDataUpdate()}} />
-            <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={productDB.blockchainId.toString()} onSuccess={() => {onDataUpdate()}}/>
+            <TransferProductModal
+                isOpen={isTransferOpen}
+                onClose={() => setIsTransferOpen(false)}
+                preFilledId={productDB.blockchainId.toString()}
+                onSuccess={(data) => {
+                    const transferData = data as TransferSuccessData;
+                    const optimisticEvent = createOptimisticEvent(
+                        productDB.blockchainId,
+                        transferData?.txHash,
+                        productDB?.characterizationHash || "0xHashNoDisponible",
+                        'TRANSFERRED',
+                        productDB.currentOwner,
+                        transferData?.newOwner
+                    );
+                    // Llamamos al padre (ProductView)
+                    onDataUpdate(transferData.newOwner, optimisticEvent);
+                    setIsTransferOpen(false);
+                }}
+            />
+            <DeleteProductModal
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+                preFilledId={productDB.blockchainId.toString()}
+                onSuccess={(data) => {
+                    const deleteData = data as DeleteSuccessData;
+
+                    const optimisticEvent = createOptimisticEvent(
+                        productDB.blockchainId,
+                        deleteData.txHash,
+                        productDB?.characterizationHash || "0xHashNoDisponible",
+                        'DELETED',
+                        productDB.currentOwner,
+                        productDB.currentOwner
+                    );
+                    onDataUpdate(productDB.currentOwner, optimisticEvent);
+                    setIsDeleteOpen(false);
+                }}
+            />
         </div>
     )
 }

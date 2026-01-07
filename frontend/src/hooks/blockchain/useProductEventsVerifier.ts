@@ -23,8 +23,8 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
         if (onNewData && productId !== undefined && owner) {
           onNewData({
             type: 'CREATED',
-            blockchainId: Number(productId),
-            to: owner,
+            productBlockchainId: Number(productId),
+            toAddress: owner,
             timestamp: Date.now(),
             isVerified: true
           })
@@ -46,9 +46,9 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
         if (onNewData && productId !== undefined && from && to) {
           onNewData({
             type: 'TRANSFERRED',
-            blockchainId: Number(productId),
-            from: from,
-            to: to,
+            productBlockchainId: Number(productId),
+            fromAddress: from,
+            toAddress: to,
             timestamp: Date.now(),
             isVerified: true
           })
@@ -70,7 +70,7 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
         if (onNewData && productId !== undefined) {
           onNewData({
             type: 'DELETED',
-            blockchainId: Number(productId),
+            productBlockchainId: Number(productId),
             timestamp: Date.now(),
             isVerified: true
           })

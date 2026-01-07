@@ -1,6 +1,6 @@
 // hooks/useGetProductFromDB.ts
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ProductDB } from '@/types/product'
 import { getProductListFromDB } from '@/services/productApi'
 import { getErrorMessage } from '@/utils/errorUtils'
@@ -11,8 +11,7 @@ export default function useGetProductListFromDB() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        const loadData = async () => {
+    const fetchData = useCallback(async () => {
             setIsLoading(true)
             setError(null)
             try {
@@ -29,15 +28,17 @@ export default function useGetProductListFromDB() {
             } finally {
                 setIsLoading(false)
             }
-        }
-
-        loadData()
     }, [])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     return {
         productListDB,
         isLoading,
         error,
-        setProductListDB
+        setProductListDB,
+        refecth: fetchData
     }
 }

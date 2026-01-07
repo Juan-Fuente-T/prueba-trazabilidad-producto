@@ -1,10 +1,10 @@
 export interface Event {
     id: string
-    blockchainId: number
+    productBlockchainId: number
+    transactionHash: string
     productHash: string
-    txHash: string
-    from: string
-    to: string
+    fromAddress: string
+    toAddress: string
     type: TypeEvent
     timestamp: number
     isVerified?: boolean

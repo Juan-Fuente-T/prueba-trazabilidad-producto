@@ -10,6 +10,11 @@ interface Props {
 export default function HistoryCard({ event }: Props) {
     const isCreation = event.type === 'CREATED';
 
+    const faseActual = isCreation
+        ? "🏭 FABRICANTE"
+        : (event.toAddress ? getRoleName(event.toAddress) : "DESCONOCIDO");
+
+    console.log("EVENTO RECIBIDO:", { type: event.type, from: event.fromAddress, to: event.toAddress, hash: event.transactionHash, id: event.productBlockchainId })
     return (
         <div className="bg-stone-50 p-3 gap-2 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-all text-center w-48 flex-shrink-0">
 
@@ -21,6 +26,11 @@ export default function HistoryCard({ event }: Props) {
             {/* TIPO DE EVENTO (BADGE) */}
             <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-2 border ${getEventBadgeColor(event.type)}`}>
                 {event.type}
+            </div>
+
+            {/* FASE ACTUAL */}
+            <div className="text-[10px] font-extrabold px-2 py-1 mb-2 rounded bg-stone-100 text-stone-600 border border-stone-200 uppercase">
+                {faseActual}
             </div>
 
             {/* 3. DESCRIPCIÓN */}
@@ -41,15 +51,15 @@ export default function HistoryCard({ event }: Props) {
                     </div>
                 ) : (
                     /* CASO 2: ES TRANSFERENCIA O BORRADO (HAY ORIGEN) */
-                    event.from && (
+                    event.fromAddress && (
                         <div className="w-full flex justify-between items-center px-2">
                             <span className="text-[9px] text-stone-700">De:</span>
                             <div className="text-right">
                                 <span className="block text-[10px] font-bold text-stone-800">
-                                    {getRoleName(event.from)}
+                                    {event.fromAddress ? getRoleName(event.fromAddress) : '???'}
                                 </span>
                                 <span className="block text-[9px] font-mono text-stone-700">
-                                    {shortenAddress(event.from)}
+                                    {event.fromAddress ? shortenAddress(event.fromAddress) : '---'}
                                 </span>
                             </div>
                         </div>
@@ -62,15 +72,15 @@ export default function HistoryCard({ event }: Props) {
                 )}
 
                 {/* DESTINO */}
-                {event.to && (
+                {event.toAddress && (
                     <div className="w-full flex justify-between items-center px-2 bg-stone-50 rounded py-1 mt-1">
                         <span className="text-[9px] text-stone-700">A:</span>
                         <div className="text-right">
                             <span className="block text-[10px] font-bold text-emerald-700">
-                                {getRoleName(event.to)}
+                                {event.toAddress ? getRoleName(event.toAddress) : '???'}
                             </span>
                             <span className="block text-[9px] font-mono text-stone-700">
-                                {shortenAddress(event.to)}
+                                {event.toAddress ? shortenAddress(event.toAddress) : '---'}
                             </span>
                         </div>
                     </div>

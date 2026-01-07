@@ -65,6 +65,7 @@ export const useProductDeleteLogic = (onClose: () => void) => {
         productDB,
         isOwner,
         productId,
+        txHash,
         setProductId,
         handleSubmit,
         status: {
