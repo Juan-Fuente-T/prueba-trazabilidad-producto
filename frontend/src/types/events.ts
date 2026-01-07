@@ -8,6 +8,7 @@ export interface Event {
     type: TypeEvent
     timestamp: number
     isVerified?: boolean
+    verified?: boolean
 }
 
 export type TypeEvent = 'CREATED' | 'TRANSFERRED' | 'DELETED'
