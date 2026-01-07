@@ -21,6 +21,9 @@ export const useProductCreationLogic = () => {
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'productId',
+        query: {
+        enabled: false, // APAGADO POR DEFECTO para evitar llamadas continuas
+    }
     })
 
     useEffect(() => {

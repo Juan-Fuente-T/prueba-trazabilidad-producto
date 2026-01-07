@@ -1,21 +1,17 @@
 'use client'
 import { useState } from 'react'
+import { ActionModalProps, OperationResult } from '@/types/operations'; // <--- IMPORTANTE
 
-// Define qué datos debe recibir el modal
-interface CommonModalProps {
-    isOpen: boolean
-    onClose: () => void
-    preFilledId?: string
-}
-interface Props {
+interface GenericActionControllerProps{
     buttonText: string      // Ej: "Crear Producto"
     buttonColor: string     // Ej: "bg-emerald-500 hover:bg-emerald-600"
-    ModalComponent: React.ComponentType<CommonModalProps>   // El modal que debe abrir (Registro, Borrado, etc)
-    preFilledId?: string // Un id prefijado para transferir o borrar
     disabled?: boolean
+    preFilledId?: string // Un id prefijado para transferir o borrar
+    ModalComponent: React.ComponentType<ActionModalProps>   // El modal que debe abrir (Registro, Borrado, etc)
+    onSuccess?: (data?: OperationResult) => void;
 }
 
-export default function GenericActionController({ buttonText, buttonColor, ModalComponent, preFilledId, disabled }: Props) {
+export default function GenericActionController({ buttonText, buttonColor, disabled, preFilledId, ModalComponent, onSuccess }: GenericActionControllerProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -31,7 +27,14 @@ export default function GenericActionController({ buttonText, buttonColor, Modal
             </button>
 
             {/* Renderiza el modal pasando isOpen y onClose automáticamente. */}
-            <ModalComponent isOpen={isOpen} onClose={() => setIsOpen(false)}  preFilledId={preFilledId}/>
+            <ModalComponent
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            preFilledId={preFilledId || ''}
+            onSuccess={(data) => {
+                    if (onSuccess) onSuccess(data);
+                    setIsOpen(false);
+                }}/>
         </div>
     )
 }

@@ -5,9 +5,10 @@ import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetEventListFromDB } from '@/hooks/api/useGetEventListFromDB'
 
 import ProductDetailCard from '@/components/products/ProductDetailCard'
-import Header from '@/components/layout/Header' // Ajusta tus imports
-import ProductNavigation from '@/components/products/ProductNavigation' // Ajusta tus imports
+import Header from '@/components/layout/Header'
+import ProductNavigation from '@/components/products/ProductNavigation'
 import Link from 'next/link'
+import { Event }  from '@/types/events'
 
 interface Props {
     productId: string
@@ -16,14 +17,31 @@ interface Props {
 export default function ProductView({ productId}: Props) {
     const numericId = useMemo(() => Number(productId), [productId])
 
-    const { productDB, isLoading, refetch: refetchProduct } = useGetProductFromDB(productId)
-    const { eventListDB, refetch: refetchEvents } = useGetEventListFromDB(productId)
+    const { productDB, isLoading, refetch: refetchProduct, setProductDB } = useGetProductFromDB(productId)
+    const { eventListDB, refetch: refetchEvents, setEventListDB  } = useGetEventListFromDB(productId)
 
-    const handleUpdateData = useCallback(() => {
-        console.log("🔄 Producto modificado (transferido o borrado), recargando...")
-        refetchProduct()
-        refetchEvents()
-    }, [refetchProduct, refetchEvents])
+    const handleUpdateData = useCallback((optimisticNewOwner?: string, newEvent?: Event) => {
+        // SI HAY DATO NUEVO, LO PINTA AL INSTANTE (OPTIMISTIC UI)
+        if (optimisticNewOwner && productDB && newEvent) {
+            console.log("🚀 Aplicando cambio optimista inmediato:", optimisticNewOwner)
+            setProductDB({
+                ...productDB,
+                currentOwner: optimisticNewOwner, // Cambia el dueño de modo optimista antes de la confirmación                // Puedes añadir más campos si tu interfaz los necesita (ej: estado: 'TRANSFERRED')
+            })
+            setEventListDB((eventListDB) => {
+                // Crea un array nuevo añadiendo el nuevo evento
+                return [...eventListDB, newEvent]
+            })
+        }
+
+        // DE FONDO, pide los datos reales a la BD para confirmar
+        // Da un pequeño margen al backend Java para terminar de guardar
+        setTimeout(() => {
+            console.log("🔄 Sincronizando con BD real...")
+            refetchProduct()
+            refetchEvents()
+        }, 500)
+    }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
 
     if (isLoading && !productDB) {
         return <div className="mt-20 text-center">Cargando producto...</div>
@@ -56,7 +74,6 @@ export default function ProductView({ productId}: Props) {
             <Header />
             <div className="container mx-auto px-4 py-8">
                 <ProductNavigation currentId={numericId} />
-                {/* Pasamos productDB asegurando que no es null (ya lo validamos arriba) */}
                 <ProductDetailCard productDB={productDB} eventListDB={eventListDB} onDataUpdate={handleUpdateData}/>
             </div>
         </main>

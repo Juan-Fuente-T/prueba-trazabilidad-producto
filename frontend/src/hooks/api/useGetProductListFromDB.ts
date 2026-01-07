@@ -37,6 +37,7 @@ export default function useGetProductListFromDB() {
     return {
         productListDB,
         isLoading,
-        error
+        error,
+        setProductListDB
     }
 }

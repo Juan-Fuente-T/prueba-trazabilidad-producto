@@ -49,6 +49,7 @@ export function useGetProductFromDB(productId?: string | null) {
         isLoading,
         error,
         isOwner,
-        refetch: fetchData
+        refetch: fetchData,
+        setProductDB
     }
 }

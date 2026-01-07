@@ -10,12 +10,13 @@ import { Web3AuthConnector } from "@web3auth/web3auth-wagmi-connector";
 import { Web3Auth } from "@web3auth/modal";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
-// import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+// const ALCHEMY_URL = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+const ALCHEMY_URL = "https://ethereum-sepolia-rpc.publicnode.com";
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0x" + sepolia.id.toString(16),
-  rpcTarget: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",  // rpcTarget: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL,
+  rpcTarget: ALCHEMY_URL,
   displayName: "Sepolia Testnet",
   blockExplorer: "https://sepolia.etherscan.io",
   ticker: "ETH",
@@ -71,13 +72,18 @@ const connectors = connectorsForWallets(
 export const config = createConfig({
   chains: [sepolia],
   transports: {
-    [sepolia.id]: http(),
+    // [sepolia.id]: http(),
+    [sepolia.id]: http(ALCHEMY_URL, {
+        batch: { wait: 16 }, // Optimización para agrupar llamadas
+    }),
   },
   // Une los conectores de RainbowKit + el de Web3Auth
   connectors: [
     ...connectors,
     web3AuthConnectorInstance as CreateConnectorFn
   ],
+  cacheTime: 0,
+  pollingInterval: 30_000, // IMPORTANTE: Por defecto es 4000 (4s). 30000 es 30 segundos.
   ssr: true,
 });
 

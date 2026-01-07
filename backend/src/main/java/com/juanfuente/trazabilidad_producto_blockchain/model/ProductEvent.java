@@ -3,7 +3,7 @@ package com.juanfuente.trazabilidad_producto_blockchain.model;
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
-;import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 @Data
@@ -35,4 +35,6 @@ public class ProductEvent {
 
     @NotNull(message = "La fecha del evento es obligatoria")
     private Long timestamp;
+
+    private boolean isVerified;
 }

@@ -6,13 +6,20 @@ import ProductList from '@/components/products/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
-import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB'
+import { useProductDashboardLogic } from '@/hooks/orchestration/useProductDashboardLogic'
 import { useAccount } from 'wagmi'
+import { ProductDB } from '@/types/product'
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
-  const { productListDB, isLoading, error } = useGetProductListFromDB()
- const { isConnected } = useAccount()
+  const { isConnected } = useAccount()
+  const {
+    productListDB,
+    handleOptimisticUpdate,
+    addNewProductToState,
+    isLoading,
+    error
+  } = useProductDashboardLogic()
 
   return (
     <main className="min-h-screen bg-stone-50 pb-20 mt-8 md:mt-20">
@@ -30,34 +37,32 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-stone-800">Inventario</h1>
               <p className="text-stone-500">Panel de Control</p>
             </div>
-            {/* <button
-              onClick={() => setIsRegisterOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm flex items-center gap-2"
-            >
-              ＋ Nuevo Producto
-            </button> */}
-
-            {!isConnected &&
             <div className="flex flex-col items-center mb-6">
-              <GenericActionController
-                buttonText="＋ Nuevo Producto"
-                buttonColor="bg-emerald-600 hover:bg-emerald-700"
-                ModalComponent={RegisterProductModal}
-                disabled={true}
-              />
+              {isConnected ? (
+                <GenericActionController
+                  buttonText="＋ Nuevo Producto"
+                  buttonColor="bg-emerald-600 hover:bg-emerald-700"
+                  ModalComponent={RegisterProductModal}
+                  disabled={true}
+                  preFilledId="" // Rellenos para cumplir con la interfaz, no se usan
+                  onSuccess={() => { }}
+                />
+              ) : (
                 <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
                   Conecta tu wallet para operar
                 </span>
-        </div>
-            }
+              )
+              }
+            </div>
           </div>
         </div>
 
         {/* ZONA DE OPERACIONES RÁPIDAS*/}
-        <QuickOperationsPanel />
+        <QuickOperationsPanel onOperationSuccess={handleOptimisticUpdate} />
 
         {/* ZONA DE EXPLORACIÓN DE PRODUCTOS*/}
         <div className="mt-8">
+          {error && <p className="text-red-500 mb-4 bg-red-50 p-2 rounded">{error}</p>}
           <h2 className="text-lg font-bold text-stone-700 mb-4">Catálogo de Activos</h2>
           {isLoading ? (
             <p className="text-center py-10 text-stone-500">Cargando...</p>
@@ -68,7 +73,17 @@ export default function Home() {
 
       </div>
 
-      <RegisterProductModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      <RegisterProductModal
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        preFilledId=""
+        onSuccess={(newProductData) => {
+          if (newProductData) {
+            addNewProductToState(newProductData as unknown as ProductDB)
+          }
+          setIsRegisterOpen(false)
+        }}
+      />
     </main>
   )
 }

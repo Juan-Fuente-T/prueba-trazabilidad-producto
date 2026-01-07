@@ -43,6 +43,7 @@ export function useGetEventListFromDB(productId: string) {
         eventListDB,
         isLoading,
         error,
-        refetch: fetchData
+        refetch: fetchData,
+        setEventListDB
     }
 }

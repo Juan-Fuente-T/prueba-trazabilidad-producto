@@ -5,15 +5,16 @@ import Modal from '../../ui/Modal'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
 import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButtons'
 import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic'
+import { ActionModalProps } from '@/types/operations';
 
-interface TransferProductModalProps {
-    isOpen: boolean
-    onClose: () => void
-    preFilledId?: string
-    onSuccess: () => void
-}
+// interface TransferProductModalProps {
+//     isOpen: boolean
+//     onClose: () => void
+//     preFilledId?: string
+//     onSuccess: (newOwner?: string) => void
+// }
 
-export default function TransferProductModal({ isOpen, onClose, preFilledId, onSuccess }: TransferProductModalProps) {
+export default function TransferProductModal({ isOpen, onClose, preFilledId, onSuccess }: ActionModalProps) {
     const {
         product,
         productDB,
@@ -50,10 +51,10 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
             //     onClose()
             // }, 2000)
             // return () => clearTimeout(timer)
-            onSuccess()
+            onSuccess({newOwner: newOwner})
         }
         // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
-    }, [status.isSuccess, status.isTransferingDB, onSuccess])
+    }, [status.isSuccess, status.isTransferingDB, newOwner, onSuccess])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Transferir Producto">

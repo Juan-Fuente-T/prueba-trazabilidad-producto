@@ -1,15 +1,32 @@
 // src/components/dashboard/QuickOperationsPanel.tsx
 'use client'
 import { useState } from 'react'
-// Importa tus modales aquí
 import TransferProductModal from '@/components/products/modals/TransferProductModal'
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
 import { useAccount } from 'wagmi'
+import { OperationResult, OperationResultWithID } from '@/types/operations';
 
-export default function QuickOperationsPanel() {
+interface QuickOperationsPanelProps {
+    onOperationSuccess?: (type: 'TRANSFER' | 'DELETE', data: OperationResultWithID) => void
+}
+
+export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperationsPanelProps) {
     const [targetId, setTargetId] = useState('')
     const { isConnected } = useAccount()
+
+    // Esta función que se pasa al Modal SOLO en el buscador
+    const handleSearchSuccess = (actionType: 'TRANSFER' | 'DELETE', payload: OperationResult) => {
+        // Optimistic UI en el resultado de búsqueda
+        if (onOperationSuccess && targetId) {
+            const dataFinal: OperationResultWithID = {
+                id: targetId,// El ID del estado
+                ...payload // Se añade lo que viene del modal (newOwner, etc)
+            };
+            onOperationSuccess(actionType, dataFinal);
+        }
+        setTargetId('')
+    }
 
     return (
         <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm mb-8">
@@ -37,6 +54,11 @@ export default function QuickOperationsPanel() {
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
+                        onSuccess={(data) => {
+                            if (data && onOperationSuccess) {
+                                handleSearchSuccess('TRANSFER', data)
+                            }
+                        }}
                     />
                     <GenericActionController
                         buttonText="🗑️ Borrar"
@@ -44,6 +66,11 @@ export default function QuickOperationsPanel() {
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
+                        onSuccess={(data) => {
+                            if (data && onOperationSuccess) {
+                                handleSearchSuccess('DELETE', data)
+                            }
+                        }}
                     />
                     {!isConnected &&
                         <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">

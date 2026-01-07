@@ -4,15 +4,9 @@ import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
 import ProductInfoCard from '@/components/products/ProductInfoCard'
 import { useProductDeleteLogic } from '@/hooks/orchestration/useProductDeleteLogic'
+import { ActionModalProps } from '@/types/operations';
 
-interface DeleteProductModalProps {
-    isOpen: boolean
-    onClose: () => void
-    preFilledId?: string
-    onSuccess: () => void
-}
-
-export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuccess }: DeleteProductModalProps) {
+export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuccess }: ActionModalProps) {
     const {
         product,
         productDB,

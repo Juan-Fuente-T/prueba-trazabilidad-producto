@@ -4,14 +4,9 @@ import { useEffect } from 'react'
 import Modal from '../../ui/Modal'
 import ImageUpload from '@/components/ui/ImageUpload'
 import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreationLogic'
+import { ActionModalProps } from '@/types/operations';
 
-interface RegisterProductModalProps {
-  isOpen: boolean
-  onClose: () => void
-  preFilledId?: string
-}
-
-export default function RegisterProductModal({ isOpen, onClose }: RegisterProductModalProps) {
+export default function RegisterProductModal({ isOpen, onClose }: ActionModalProps) {
 const {
     formData,
     imageFile,

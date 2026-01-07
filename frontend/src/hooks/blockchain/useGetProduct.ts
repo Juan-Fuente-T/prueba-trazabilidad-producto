@@ -4,7 +4,6 @@ import { useReadContract, useAccount } from 'wagmi'
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 import { Product } from '@/types/product'
 
-
 export function useGetProduct(productId?: bigint) {
     const { address } = useAccount()
 
@@ -14,7 +13,7 @@ export function useGetProduct(productId?: bigint) {
         functionName: 'getProduct',
         args: productId ? [productId] : undefined,
         query: {
-            enabled: !!productId
+            enabled: productId !== undefined
         }
     }) as { data: Product | undefined, isLoading: boolean, error: Error | null }
 
