@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  borme-backend:
+    # Usa una imagen ligera de Java para ejecutarse
+    image: eclipse-temurin:17-jre-alpine
+    container_name: product-tracker-backend
+    # Hace que se se reinicie si se cae
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Coge el archivo app.jar de la carpeta y lo mete en el contenedor
+      - ./borme-scraper-backend.jar:/product-tracker-backend.jar
+    # Comando de arranque
+    command: ["java", "-jar", "/product-tracker-backend.jar"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # Límites de memoria para que no se caiga por exceder límites (ram en reposo y limite en uso)
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m
+      - ALLOWED_ORIGINS=https://productstrackerapp.netlify.app/,http://localhost:5173
