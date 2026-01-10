@@ -18,4 +18,5 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       # Límites de memoria para que no se caiga por exceder límites (ram en reposo y limite en uso)
       - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m
-      - ALLOWED_ORIGINS=https://productstrackerapp.netlify.app/,http://localhost:5173
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - MONGO_URL=${MONGO_URL}

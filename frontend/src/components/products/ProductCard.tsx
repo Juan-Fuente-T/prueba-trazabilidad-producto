@@ -11,9 +11,10 @@ interface productCardProps {
     productId?: bigint;
     product: Product;
     onClose: () => void;
+    onRefetch?: () => Promise<unknown>;
 }
 
-export default function ProductCard({ productId, product, onClose }: productCardProps) {
+export default function ProductCard({ productId, product, onClose, onRefetch }: productCardProps) {
     const { address } = useAccount();
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -27,6 +28,13 @@ export default function ProductCard({ productId, product, onClose }: productCard
             console.warn("Clipboard no disponible");
         }
     }
+
+    const handleTransferSuccess = () => {
+        setTimeout(() => {
+            setIsTransferOpen(false);
+            if (onRefetch) onRefetch();
+        }, 4000);
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-lg border border-stone-200 overflow-hidden relative w-full max-w-4xl mx-auto my-6 animate-fade-in-up">
@@ -139,8 +147,8 @@ export default function ProductCard({ productId, product, onClose }: productCard
             {/* Renderizado condicional de los Modales */}
             {isOwner && (
                 <>
-                    <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={productId?.toString()} />
-                    <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={productId?.toString()}/>
+                    <TransferProductModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} preFilledId={productId?.toString()} onSuccess={handleTransferSuccess} />
+                    <DeleteProductModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} preFilledId={productId?.toString()} onSuccess={handleTransferSuccess} />
                 </>
             )}
         </div>
