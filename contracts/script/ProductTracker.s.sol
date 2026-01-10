@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-import { Script, console, console2 } from "../lib/forge-std/src/Script.sol";
+import {Script, console, console2} from "../lib/forge-std/src/Script.sol";
 import {ProductTracker} from "../src/ProductTracker.sol";
 
 // source .env   Carga las variables de entorno en la terminal (git bash)
