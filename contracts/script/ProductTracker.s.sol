@@ -15,6 +15,7 @@ contract ProductTrackerScript is Script {
     ProductTracker public productTracker;
 
     function setUp() public {}
+
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         console2.log("Deployer private key: ", deployerPrivateKey);
@@ -24,6 +25,5 @@ contract ProductTrackerScript is Script {
         console2.log("ProductTracker contract deployed at: ", address(productTracker));
         require(address(productTracker) != address(0), "Failed to deploy ProductTracker");
         vm.stopBroadcast();
-        }
-
+    }
 }

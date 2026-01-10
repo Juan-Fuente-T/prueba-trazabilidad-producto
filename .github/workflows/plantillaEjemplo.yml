@@ -1,0 +1,29 @@
+# --- NIVEL 0: ETIQUETA (Opcional, pero recomendado para no volverse loco) ---
+#name: Nombre Legible del Proceso (ej: CI Blockchain)
+
+# --- NIVEL 1: EL GATILLO (Obligatorio) ---
+#on:
+  #push:             # ¿Cuándo? Cuando empujes código...
+    #branches: [main] # ... a la rama main
+
+# --- NIVEL 2: LOS TRABAJOS (Obligatorio) ---
+#jobs:
+  # Nombre interno del trabajo (puedes poner 'build', 'test', 'pepito'...)
+  #comprobar-codigo: 
+    
+    # --- NIVEL 3: LA MÁQUINA (Obligatorio) ---
+    #runs-on: ubuntu-latest  # Usar Linux estándar
+    
+    # --- NIVEL 4: LOS PASOS (Obligatorio) ---
+    #steps:
+      # Paso A: Siempre es bajar el código
+      #- name: Bajar código
+        #uses: actions/checkout@v4
+
+      # Paso B: Instalar herramienta (Java, Node, Foundry...)
+      #- name: Instalar Herramienta
+        #uses: ... (la que busques en el marketplace)
+
+      # Paso C: Ejecutar comando
+      #- name: Ejecutar Test
+        #run: ... (el comando de consola)

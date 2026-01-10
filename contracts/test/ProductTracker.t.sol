@@ -14,7 +14,6 @@ contract ProductTrackerTest is Test {
     event ProductTransferred(uint256 indexed productId, address from, address to);
     event ProductDeleted(uint256 indexed productId, address indexed owner);
 
-
     function setUp() public {
         productTracker = new ProductTracker();
         alice = makeAddr("alice");
@@ -27,7 +26,7 @@ contract ProductTrackerTest is Test {
         emit ProductRegistered(1, alice);
         uint256 productId1 = productTracker.registerProduct(5, keccak256(abi.encodePacked("Product 1")));
         assertEq(productId1, 1);
-        ProductTracker.Product memory product1 =  productTracker.getProduct(productId1);
+        ProductTracker.Product memory product1 = productTracker.getProduct(productId1);
         // console.log("Product 1 ID:", productId1);
         // console.log("Product 1 Quantity:", product1.quantity);
 
@@ -44,13 +43,14 @@ contract ProductTrackerTest is Test {
         uint256 productId2 = productTracker.registerProduct(55, keccak256(abi.encodePacked("Product 2")));
         assertNotEq(productId2, 1);
         assertEq(productId2, 2);
-        ProductTracker.Product memory product2 =  productTracker.getProduct(productId2);
+        ProductTracker.Product memory product2 = productTracker.getProduct(productId2);
         assertEq(productTracker.activeProducts(), 2);
         assertEq(product2.characterizationHash, keccak256(abi.encodePacked("Product 2")));
         assertEq(product2.quantity, 55);
-        assertEq(product2.currentOwner,bob);
+        assertEq(product2.currentOwner, bob);
         assertEq(product2.exists, true);
     }
+
     function testRegisterProductFail() public {
         vm.expectRevert(abi.encodeWithSignature("InvalidQuantity()"));
         uint256 productId1 = productTracker.registerProduct(0, keccak256(abi.encodePacked("Product 1")));
