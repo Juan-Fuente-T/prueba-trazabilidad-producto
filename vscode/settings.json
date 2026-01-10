@@ -1,4 +1,8 @@
 {
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "lib"
+    "solidity.packageDefaultDependenciesDirectory": "lib",
+    "solidity.remappings": [
+        "forge-std/=contracts/lib/forge-std/src/",
+        "ds-test/=contracts/lib/forge-std/lib/ds-test/src/"
+    ]
 }

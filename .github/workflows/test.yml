@@ -20,6 +20,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: INSTALAR LIBRERÍA A LA FUERZA
+        run: |
+          rm -rf contracts/lib/forge-std
+          mkdir -p contracts/lib
+          git clone https://github.com/foundry-rs/forge-std contracts/lib/forge-std
+          ls -la contracts/lib/forge-std/src
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
@@ -28,16 +35,19 @@ jobs:
           forge --version
 
       - name: Run Forge fmt
+        working-directory: contracts
         run: |
           forge fmt --check
         id: fmt
 
       - name: Run Forge build
+        working-directory: contracts
         run: |
           forge build --sizes
         id: build
 
       - name: Run Forge tests
+        working-directory: contracts
         run: |
           forge test -vvv
         id: test
