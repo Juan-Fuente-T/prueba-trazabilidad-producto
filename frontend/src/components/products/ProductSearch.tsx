@@ -1,24 +1,13 @@
 'use client'
 import { useState } from 'react'
-import ProductCard from './ProductCard' // Crearemos este componente mejorado abajo
-// import { useGetProduct } from '@/hooks/useGetProduct' 
+import ProductCard from './ProductCard'
+import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
 
 export default function ProductSearch() {
     const [searchId, setSearchId] = useState('')
     const [queriedId, setQueriedId] = useState<bigint | undefined>()
 
-    // Mock de datos para diseño (luego descomenta tu hook real)
-    // const { product, isLoading, error } = useGetProduct(queriedId)
-
-    // MOCK TEMPORAL PARA VER EL DISEÑO SIN BLOCKCHAIN
-    const mockProduct = queriedId ? {
-        quantity: BigInt(50),
-        characterizationHash: "0x7f9a8d7e6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a" as `0x${string}`,
-        // currentOwner: "0xE509E7039bd8D78518822B5cBE80E93D84D2c452" as `0x${string}`,
-        currentOwner: "0xe67F18c5064f12470Efc943798236edF45CF3Afb" as `0x${string}`,
-        timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        exists: true
-    } : null;
+    const { product, isLoading, error, refetch } = useGetProduct(queriedId)
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,7 +21,7 @@ export default function ProductSearch() {
 
     return (
         <div className="w-full space-y-8">
-            {/* Barra de Búsqueda Estilo "Google" */}
+            {/* Barra de Búsqueda */}
             <div className="bg-white p-2 rounded-xl shadow-sm border border-stone-200 flex items-center w-full mx-auto focus-within:ring-2 focus-within:ring-blue-500 transition-all">
                 <span className="pl-4 text-stone-400">🔍</span>
                 <input
@@ -55,14 +44,13 @@ export default function ProductSearch() {
             </div>
 
             {/* Renderizado Condicional del Resultado */}
-            {/* {isLoading && <div className="text-center py-8"><div className="animate-spin text-4xl">⏳</div><p className="mt-2 text-stone-500">Consultando Blockchain...</p></div>} */}
+            {isLoading && <div className="text-center py-8"><div className="animate-spin text-4xl">⏳</div><p className="mt-2 text-stone-500">Consultando Blockchain...</p></div>}
 
-            {/* {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center border border-red-100">❌ Producto no encontrado en el registro.</div>} */}
+            {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center border border-red-100">❌ Producto no encontrado en el registro.</div>}
 
-            {/* Aquí usamos el nuevo componente ProductCard visualmente rico */}
-            {queriedId && mockProduct && (
+            {queriedId && product && (
                 <div className="animate-fade-in-up">
-                    <ProductCard product={mockProduct} productId={queriedId} onClose={handleClose} />
+                    <ProductCard product={product} productId={queriedId} onClose={handleClose} onRefetch={refetch}/>
                 </div>
             )}
         </div>

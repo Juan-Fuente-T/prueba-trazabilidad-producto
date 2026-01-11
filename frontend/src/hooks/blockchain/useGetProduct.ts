@@ -7,7 +7,7 @@ import { Product } from '@/types/product'
 export function useGetProduct(productId?: bigint) {
     const { address } = useAccount()
 
-    const { data: product, isLoading, error } = useReadContract({
+    const { data: product, isLoading, error, refetch } = useReadContract({
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'getProduct',
@@ -15,7 +15,7 @@ export function useGetProduct(productId?: bigint) {
         query: {
             enabled: productId !== undefined
         }
-    }) as { data: Product | undefined, isLoading: boolean, error: Error | null }
+    }) as { data: Product | undefined, isLoading: boolean, error: Error | null, refetch: () => Promise<unknown>}
 
     const isOwner = product && address
         ? product.currentOwner.toLowerCase() === address.toLowerCase()
@@ -25,6 +25,7 @@ export function useGetProduct(productId?: bigint) {
         product,
         isLoading,
         error,
-        isOwner
+        isOwner,
+        refetch
     }
 }
