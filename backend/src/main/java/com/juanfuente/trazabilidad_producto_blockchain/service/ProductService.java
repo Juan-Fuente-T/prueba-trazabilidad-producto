@@ -18,7 +18,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductEventRepository eventRepository;
+    private final ProductEventService productEventService;
 
     /**
      * Registra un nuevo producto en la base de datos tras ser creado en Blockchain.
@@ -39,7 +39,7 @@ public class ProductService {
         // Guarda el producto completo (Mongo genera el _id interno)
         Product savedProduct = productRepository.save(product);
 
-        logEvent(product, creationTxHash,
+        productEventService.registerEvent(product, creationTxHash,
                 "0x0000000000000000000000000000000000000000",
                 product.getCurrentOwner(),
                 EventType.CREATED);
@@ -74,7 +74,7 @@ public class ProductService {
         product.setCurrentOwner(newOwnerAddress);
         Product transferredProduct = productRepository.save(product);
 
-        logEvent(product, txHash, oldOwner, newOwnerAddress, EventType.TRANSFERRED);
+        productEventService.registerEvent(product, txHash, oldOwner, newOwnerAddress, EventType.TRANSFERRED);
 
         //Convierte la Entidad a DTO antes de devolverla
         return ProductResponse.fromEntity(transferredProduct);
@@ -107,7 +107,7 @@ public class ProductService {
         Product deletedProduct = productRepository.save(product);
 
         String oldOwner = product.getCurrentOwner();
-        logEvent(product, txHash, oldOwner, oldOwner, EventType.DELETED);
+        productEventService.registerEvent(product, txHash, oldOwner, oldOwner, EventType.DELETED);
 
         return ProductResponse.fromEntity(deletedProduct);
     }
@@ -129,45 +129,6 @@ public class ProductService {
      */
     public Product getProductByBlockchainId(Long blockchainId) {
         return productRepository.findByBlockchainId(blockchainId);
-    }
-
-    /**
-     * Obtiene la traza de auditoría completa (trazabilidad) de un producto.
-     * * @param blockchainId El ID del producto a consultar.
-     *
-     * @return Lista cronológica de todos los eventos (Creación, Transferencias, Borrado) asociados.
-     */
-    public List<ProductEvent> getProductHistory(Long blockchainId) {
-        return eventRepository.findByProductBlockchainId(blockchainId);
-    }
-
-    /**
-     * Método auxiliar interno encargado de centralizar la lógica de auditoría.
-     * <p>
-     * Crea y persiste un registro inmutable (ProductEvent) que documenta cualquier cambio
-     * de estado en el ciclo de vida del producto.
-     * Nota: Obtiene el hash de caracterización directamente de la entidad Producto
-     * para asegurar que el evento queda vinculado al estado validado actual.
-     *
-     * @param product La entidad producto actualizada (fuente de verdad).
-     * @param txHash El hash de la transacción en la red Ethereum.
-     * @param from Dirección de origen (o nula en creación).
-     * @param to Dirección de destino (o nula en borrado).
-     * @param type El tipo de operación realizada (CREATED, TRANSFERRED, DELETED).
-     */
-    @Transactional
-    private void logEvent(Product product, String txHash, String from, String to, EventType type) {
-        ProductEvent event = new ProductEvent();
-        event.setProductBlockchainId(product.getBlockchainId());
-        // Coge el hash del producto REAL de la BD para asegurar integridad
-        event.setProductHash(product.getCharacterizationHash());
-        event.setTransactionHash(txHash);
-        event.setFromAddress(from);
-        event.setToAddress(to);
-        event.setType(type);
-        event.setTimestamp(System.currentTimeMillis());
-
-        eventRepository.save(event);
     }
 
     /**

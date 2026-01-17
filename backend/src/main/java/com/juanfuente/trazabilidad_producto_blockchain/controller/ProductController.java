@@ -48,17 +48,6 @@ public class ProductController {
         return ResponseEntity.ok(new ApiResponse<>("Producto encontrado", product));
     }
 
-    /**
-     * Endpoint para consultar la trazabilidad de un producto.
-     * GET /api/products/{blockchainId}/history
-     * * @param blockchainId El ID del producto.
-     * @return Respuesta estandarizada con la lista de eventos históricos.
-     */
-    @GetMapping("/{blockchainId}/history")
-    public ResponseEntity<ApiResponse<List<ProductEvent>>> getProductHistory(@PathVariable Long blockchainId) {
-        List<ProductEvent> history = productService.getProductHistory(blockchainId);
-        return ResponseEntity.ok(new ApiResponse<>("Historial obtenido", history));
-    }
 
     /**
      * Endpoint para registrar un producto recién creado en la DApp.

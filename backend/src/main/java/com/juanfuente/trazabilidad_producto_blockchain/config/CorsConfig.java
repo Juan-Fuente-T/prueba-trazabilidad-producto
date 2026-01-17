@@ -11,8 +11,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
     //Permite ajustar la url del front añadiendo variables de entorno ALLOWED_ORIGINS
-    // a allowedOrigins en el servidor donde este desplegada la app, en este caso mi servidor.
-//    @Value("#{'${ALLOWED_ORIGINS:*}'.split(',')}") // Si no existe la variable, usa "*"
+    // a allowedOrigins en el servidor donde esté desplegada la app, en este caso mi servidor.
+    //    @Value("#{'${ALLOWED_ORIGINS:*}'.split(',')}") // Si no existe la variable, usa "*"
     private String[] allowedOrigins;
 
     public CorsConfig(
