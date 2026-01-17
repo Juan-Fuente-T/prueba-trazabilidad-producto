@@ -15,7 +15,7 @@ export default function InstructionsSection() {
                 </div>
                 <h3 className="text-lg font-bold text-stone-800">Conecta tu Wallet</h3>
                 <p className="text-sm text-stone-600 leading-relaxed">
-                    Usa el botón superior derecho para conevtarme con un email con tu cuenta usando una wallet (por ejemplo MetaMask). Asegúrate de estar en la red de prueba correcta (Sepolia) para firmar transacciones sin coste real.
+                    Usa el botón superior derecho para conectarte con un email con tu propia cuenta usando una wallet (por ejemplo MetaMask). Asegúrate de estar en la red de prueba correcta (Sepolia).
                 </p>
             </div>
 
@@ -49,7 +49,7 @@ export default function InstructionsSection() {
                 </div>
                 <h3 className="text-lg font-bold text-stone-800">Transfiere o Borra</h3>
                 <p className="text-sm text-stone-600 leading-relaxed">
-                    Entra en el detalle de un producto (o hazlo directamente usando unid). Si eres el dueño, podrás <strong>Transferirlo</strong> a otra dirección nueva o elegir una prefijada(ej. Transportista) o <strong>Eliminarlo</strong> para sacarlo de circulación.
+                    Entra en el detalle de un producto (o hazlo directamente usando un ID). Si eres el dueño, podrás <strong>Transferirlo</strong> puedes avanzar el producto en la cadena de suministro (ej. Transportista) o <strong>Eliminarlo</strong> para sacarlo de circulación.
                 </p>
             </div>
         </div>
