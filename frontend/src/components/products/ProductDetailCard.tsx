@@ -104,7 +104,7 @@ export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate
                         {/* Cantidad y Owner */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
-                                <p className="text-xs font-bold text-stone-400 uppercase">Cantidad</p>
+                                <p className="text-xs font-bold text-stone-400 uppercase">Unidades del Lote</p>
                                 <p className="text-2xl font-bold text-stone-800">{Number(productDB?.quantity)} uds.</p>
                             </div>
                             <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">

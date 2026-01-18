@@ -1,4 +1,4 @@
-import { Event, TypeEvent } from '@/types/events' // O donde tengas tus tipos
+import { Event, TypeEvent } from '@/types/events'
 
 export const createOptimisticEvent = (
     productBlockchainId: number,

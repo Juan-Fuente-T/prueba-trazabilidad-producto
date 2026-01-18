@@ -40,7 +40,7 @@ export default function ProductView({ productId}: Props) {
             console.log("🔄 Sincronizando con BD real...")
             refetchProduct()
             refetchEvents()
-        }, 4000)
+        }, 2000)
     }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
 
     if (isLoading && !productDB) {

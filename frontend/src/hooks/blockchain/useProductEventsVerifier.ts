@@ -8,9 +8,7 @@ type EventCallback = (message: string, type: TypeEvent) => void
 // Callback para pasar los datos crudos y actualizar listas
 type DataCallback = (eventData: Partial<Event>) => void
 
-export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: DataCallback) {
-  console.log("RENDERIZANDO...useProductEventsverifier")
-  // Escucha ProductRegistered
+export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: DataCallback) {  // Escucha ProductRegistered
   useWatchContractEvent({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,

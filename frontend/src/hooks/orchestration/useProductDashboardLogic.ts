@@ -5,7 +5,6 @@ import { ProductDB } from '@/types/product'
 import { Event } from '@/types/events'
 
 export function useProductDashboardLogic() {
-    console.log("RENDERIZANDO...", useProductDashboardLogic)
     const { productListDB, setProductListDB, isLoading, error, refecth} = useGetProductListFromDB()
 
     // Confirmamos los datos actuales desde el evento en blockchai
