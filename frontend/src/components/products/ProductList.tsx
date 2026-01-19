@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { ProductDB } from '@/types/product'
 import ProductSearchBar from './ProductSearchBar'
-import ProductGrid from './ProductGrid'
+import ProductTable from './ProductTable'
+
 
 interface ProductListProps {
     products: ProductDB[]
@@ -27,7 +28,7 @@ export default function ProductList({ products }: ProductListProps) {
                 onSearchChange={setSearchTerm}
                 totalProducts={filteredProducts.length}
             />
-            <ProductGrid products={filteredProducts} />
+            <ProductTable products={filteredProducts} />
         </div>
     )
 }

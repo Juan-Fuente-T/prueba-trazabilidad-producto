@@ -6,6 +6,16 @@ import ImageUpload from '@/components/ui/ImageUpload'
 import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreationLogic'
 import { ActionModalProps } from '@/types/operations';
 
+
+
+{/* 1. Diccionario Industrial (Naming)
+      Para que no parezca una tienda online:
+      Dueño => Custodio Actual o Operador Responsable.
+      Producto => Lote de Producción o Referencia.
+      Cantidad => Unidades / Volumen.
+      Crear => Registrar Lote. */}
+
+
 export default function RegisterProductModal({ isOpen, onClose, onSuccess }: ActionModalProps) {
   const {
     formData,
@@ -45,7 +55,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
     <Modal isOpen={isOpen} onClose={onClose} title="Register Product">
       <form onSubmit={handleSubmit} className="space-y-4 z-[999]">
         <div>
-          <label className="block text-sm font-medium mb-1">Nombre</label>
+          <label className="block text-sm font-medium mb-1">Referencia</label>
           <input
             id='name'
             name='name'
@@ -58,7 +68,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Cantidad</label>
+          <label className="block text-sm font-medium mb-1">Volumen</label>
           <input
             id='quantity'
             name='quantity'
@@ -91,26 +101,25 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
         {/* --- GESTIÓN DE ERRORES VISUAL --- */}
         {/* A. Error Blockchain */}
         {errors.blockchainError && (
-            <div className="bg-red-50 ...">
-                {errors.blockchainError.message.includes("User denied") || errors.blockchainError.message.includes("rejected")
-                    ? "Operación cancelada por el usuario."
-                    : errors.blockchainError.message // Si es otro error, se muestra
-                }
-            </div>
+          <div className="bg-red-50 ...">
+            {errors.blockchainError.message.includes("User denied") || errors.blockchainError.message.includes("rejected")
+              ? "Operación cancelada por el usuario."
+              : errors.blockchainError.message // Si es otro error, se muestra
+            }
+          </div>
         )}
 
         {/* B. Error Base de Datos (Caso Limbo) */}
         {status.isSuccess && errors.errorDB && (
           <div className="bg-orange-50 border border-orange-200 p-3 rounded text-center">
-            <p className="text-orange-700 font-bold text-sm">⚠️ Guardado en Blockchain, pero falló BD</p>
+            <p className="text-orange-700 font-bold text-sm">⚠️ Registrado en Blockchain, pero falló en BD</p>
             <p className="text-orange-600 text-xs mt-1">{errors.errorDB}</p>
           </div>
         )}
-
         {/* C. Éxito Total */}
         {status.isSuccess && !errors.errorDB && !status.isSavingDB && (
           <p className="text-green-600 font-bold text-center text-lg animate-pulse">
-            ✅ ¡Producto Creado Exitosamente!
+            ✅ ¡Producto Registrado Exitosamente!
           </p>
         )}
 
@@ -124,7 +133,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
               className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!formData.quantity || !formData.name || status.isGlobalLoading}
             >
-              {status.isGlobalLoading ? 'Procesando...' : 'Crear Producto'}
+              {status.isGlobalLoading ? 'Procesando...' : 'Registrar Producto'}
             </button>
           )
         )}

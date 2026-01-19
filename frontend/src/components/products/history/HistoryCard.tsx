@@ -13,7 +13,7 @@ export default function HistoryCard({ event }: Props) {
     const hasVerification = event.isVerified || event.verified;
 
     const faseActual = isCreation
-        ? "🏭 FABRICANTE"
+        ? "🐟 LONJA/ORIGEN"
         : isDeleted ? "⛔ ELIMINADO"
             : (event.toAddress ? getRoleName(event.toAddress) : "DESCONOCIDO");
 

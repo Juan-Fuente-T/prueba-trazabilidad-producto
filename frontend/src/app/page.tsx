@@ -2,8 +2,6 @@
 'use client'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import InformationSection from '@/components/ui/InformationSection'
-import InstructionsSection from '@/components/ui/InstructionsSection'
 import ProductList from '@/components/products/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
@@ -31,15 +29,6 @@ export default function Home() {
           <h1 className="text-lg sm:text-2xl font-bold mb-12 mt-8 text-center w-full">
             Prueba de concepto para trazabilidad de producto en Blockchain (Java / Spring / Next / Typescript / Solidity)
           </h1>
-          {/* SECCIÓN INFORMATIVA*/}
-          <InformationSection />
-
-          <h3 className="text-lg sm:text-2xl font-bold mb-12 mt-8 text-center w-full">
-            Modo de uso
-          </h3>
-          {/* SECCIÓN INSTRUCCIONES */}
-          <InstructionsSection />
-
           {/* 2. BARRA SUPERIOR: BOTÓN DE CREAR */}
           <div className="flex justify-between items-center mx-auto mb-8 sm:mb-12 w-full">
             <div>
@@ -55,10 +44,10 @@ export default function Home() {
                   disabled={!isConnected}
                   preFilledId="" // Relleno para cumplir con la interfaz
                   onSuccess={() => {
-                    // espera 4 segundos a que el Backend indexe y RECARGA la lista.
+                    // espera 2 segundos a que el Backend indexe y RECARGA la lista.
                     setTimeout(() => {
                       refecth()
-                    }, 4000)
+                    }, 2000)
                   }}
                 />
               ) : (
