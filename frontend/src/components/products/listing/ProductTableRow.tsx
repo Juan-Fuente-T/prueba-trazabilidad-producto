@@ -1,26 +1,42 @@
 import { ProductDB } from '@/types/product'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { getActorInfo } from '@/utils/roleUtils'
 
 export default function ProductTableRow({ product }: { product: ProductDB }) {
-    const info = getActorInfo(product.currentOwner);
     const [showImage, setShowImage] = useState(false);
-    // Lógica visual simple
+    const router = useRouter()
+    const info = getActorInfo(product.currentOwner);
+
+    // Función para navegar a detalle de lote
+    const handleRowClick = (e: React.MouseEvent) => {
+        // Evita que se dispare si se hace clic en un botón de acción específico dentro de la fila
+        if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
+            return;
+        }
+        router.push(`/products/${product.blockchainId}`);
+    }
+
     const shortOwner = typeof product.currentOwner === 'string'
         ? `${product.currentOwner.substring(0, 6)}...${product.currentOwner.slice(-4)}`
         : '...'
 
     return (
         <>
-            <tr className="hover:bg-acero-50 transition-colors group border-b border-acero-100 last:border-0">
-
+            <tr
+                onClick={handleRowClick}
+                className="hover:bg-acero-50 transition-colors group border-b border-acero-100 last:border-0 cursor-pointer"
+            >
                 {/* 1. REF / IMAGEN */}
                 <td className="px-4 py-3 align-middle">
                     <div className="flex items-center gap-3">
                         <div
                             className="h-12 w-12 bg-white border border-acero-200 rounded p-0.5 flex-shrink-0 cursor-zoom-in hover:border-industrial transition-colors shadow-sm"
-                            onClick={() => setShowImage(true)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowImage(true);
+                            }}
                         >
                             {product.imageUrl ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -76,6 +92,7 @@ export default function ProductTableRow({ product }: { product: ProductDB }) {
                 {/* 6. ACCIÓN */}
                 <td className="px-4 py-3 align-middle text-right">
                     <Link
+                        onClick={(e) => e.stopPropagation()}
                         href={`/products/${product.blockchainId}`}
                         className="inline-block text-acero-500 hover:text-industrial hover:bg-white border border-transparent hover:border-acero-200 p-1.5 rounded transition-all"
                         title="Gestionar Lote"
@@ -86,17 +103,31 @@ export default function ProductTableRow({ product }: { product: ProductDB }) {
             </tr>
             {/* LIGHTBOX MODAL (Portal simple) */}
             {showImage && product.imageUrl && (
-                <tr className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-8" onClick={() => setShowImage(false)}>
-                    <td className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-8"
+                    onClick={() => setShowImage(false)}
+                >
+                    <div className="absolute inset-0 relative flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={product.imageUrl}
                             alt="Zoom"
                             className="max-w-[90vw] max-h-[90vh] object-contain rounded shadow-2xl pointer-events-auto"
                         />
-                        <button className="absolute top-5 right-5 text-white text-2xl font-bold bg-black/50 w-10 h-10 rounded-full pointer-events-auto hover:bg-white/20">✕</button>
-                    </td>
-                </tr>
+                        <div className="absolute top-5 right-5 z-10">
+                            <button className="text-white text-2xl font-bold bg-black/50 w-10 h-10 rounded-full hover:bg-black/80 hover:scale-105 transition-transform"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowImage(false);
+                                }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     )

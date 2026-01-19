@@ -9,7 +9,7 @@ interface ProductInfoCardProps {
     loadingDB: boolean
     isLoadingBlockchain: boolean
     isOwner: boolean
-    variant?: 'default' | 'danger' // 'default' para transferir, 'danger' para borrar
+    variant?: 'default' | 'danger' // 'default' para asignar, 'danger' para bajas
     minHeight?: string // Para controlar el salto de layout
 }
 
@@ -52,19 +52,20 @@ export default function ProductInfoCard({
                         </p>
                     )}
 
-                    <div className="grid grid-cols-[80px_1fr] gap-y-1 text-gray-700">
-                        <span className="font-semibold text-gray-500">Nombre:</span>
-                        <span className="font-bold text-gray-900">
+                    {/* <div className="grid grid-cols-[80px_1fr] gap-y-1 text-acero-700 no-wrap w-full border"> */}
+                    <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-acero-700 w-full border">
+                        <span className="font-semibold text-acero-500 whitespace-nowrap">Referencia:</span>
+                        <span className="font-bold text-acero-900">
                             {loadingDB ? "Cargando..." : productDB?.name || "(Desconocido)"}
                         </span>
 
-                        <span className="font-semibold text-gray-500">ID:</span>
+                        <span className="font-semibold text-acero-500">ID:</span>
                         <span>{productId}</span>
 
-                        <span className="font-semibold text-gray-500">Estado:</span>
+                        <span className="font-semibold text-acero-500">Custodio:</span>
                         <span>{roleLabel}</span>
 
-                        <span className="font-semibold text-gray-500">Dueño:</span>
+                        <span className="font-semibold text-acero-500">ID de Custodio:</span>
                         <span className="font-mono text-xs pt-0.5">
                             {shortenAddress(product.currentOwner)}
                         </span>
@@ -73,7 +74,7 @@ export default function ProductInfoCard({
                     {/* Aviso de NO OWNER */}
                     {!isOwner && (
                         <div className="mt-3 bg-red-100 text-red-700 p-2 rounded text-center text-xs font-bold border border-red-200">
-                            ⛔ NO ERES EL DUEÑO. ACCESO DENEGADO.
+                            ⛔ NO ERES EL CUSTODIO. ACCESO DENEGADO.
                         </div>
                     )}
                 </div>
@@ -90,7 +91,7 @@ export default function ProductInfoCard({
 
             {/* CASO C: ESTADO INICIAL (VACÍO) */}
             {!productId && (
-                <p className="text-gray-400 text-sm italic">Introduce un ID para ver detalles...</p>
+                <p className="text-acero-400 text-sm italic">Introduce un ID para ver detalles...</p>
             )}
         </div>
     )

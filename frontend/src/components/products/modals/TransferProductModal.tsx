@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Modal from '../../ui/Modal'
-import ProductInfoCard from '@/components/products/ProductInfoCard'
+import ProductInfoCard from '@/components/products/modals/ProductInfoCard'
 import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButtons'
 import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic'
 import { ActionModalProps } from '@/types/operations';
@@ -52,7 +52,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
     }, [status.isSuccess, status.isTransferingDB, newOwner, onSuccess])
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Transferir Producto">
+        <Modal isOpen={isOpen} onClose={onClose} title="Asignar Producto">
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {/* INPUT ID */}
@@ -109,13 +109,13 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                 {status.isSuccess ? (
                     <p className="text-green-600 font-bold text-center">✅ Transferencia completada</p>
                 ) : (
-                    //* BOTÓN TRANSFERENCIA
+                    //* BOTÓN Asignacion
                     <button
                         type="submit"
                         className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
                         disabled={!productId || !newOwner || !isOwner || status.isPending || status.isConfirming || status.isTransferingDB}
                     >
-                        {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Transferir Propiedad'}
+                        {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Asinar Producto'}
                     </button>
                 )}
             </form>

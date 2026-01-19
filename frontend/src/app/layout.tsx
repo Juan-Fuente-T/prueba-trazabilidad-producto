@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -22,10 +24,15 @@ export default function RootLayout({
     <html lang="es">
       <body
         className={`${robotoMono.variable} font-sans antialiased`}
-        >
-          <Providers>
+      >
+        <Providers>
+          <Header />
+          {/* pt-16 compensa la altura del Header fijo */}
+          <main className="flex-grow pt-16 w-full">
             {children}
-          </Providers>
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

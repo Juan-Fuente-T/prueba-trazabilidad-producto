@@ -1,7 +1,7 @@
 
 import { ProductDB } from '@/types/product'
 import ProductTableRow from './ProductTableRow'
-import ProductMobileCard from './ProductMobileCard'
+import ProductMobileCard from '../detail/ProductMobileCard'
 
 interface ProductGridProps {
     products: ProductDB[];

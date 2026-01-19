@@ -1,8 +1,6 @@
 // src/app/page.tsx
 'use client'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import ProductList from '@/components/products/ProductList'
+import ProductList from '@/components/products/listing/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
@@ -20,9 +18,7 @@ export default function Home() {
   } = useProductDashboardLogic()
 
   return (
-    <main className="min-h-screen bg-stone-50 pb-20 mt-8 md:mt-20">
-      <Header />
-
+    <main className="min-h-screen bg-stone-50 ">
       <div className="container mx-auto px-4 py-8">
         {/* CABECERA*/}
         <div className="flex  flex-col justify-between items-end">
@@ -38,7 +34,7 @@ export default function Home() {
             <div className="flex flex-col items-center mb-6">
               {isConnected ? (
                 <GenericActionController
-                  buttonText="＋ Nuevo Producto"
+                  buttonText="＋ Nuevo Lote"
                   buttonColor="bg-emerald-600 hover:bg-emerald-700"
                   ModalComponent={RegisterProductModal}
                   disabled={!isConnected}
@@ -74,7 +70,6 @@ export default function Home() {
           )}
         </div>
       </div>
-      <Footer/>
     </main>
   )
 }

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { useAccount, useReadContract } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { useRegisterProduct } from '@/hooks/blockchain/useRegisterProduct'
 import { useSaveProductToDB } from '@/hooks/api/useSaveProductToDB'
 import { calculateHash } from '@/utils/hashUtils'
 import { fileToBase64 } from '@/utils/fileUtils'
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
+import { useProductMetrics } from '@/hooks/blockchain/useProductMetrics';
+
 
 export const useProductCreationLogic = () => {
     const [formData, setFormData] = useState({ name: '', description: '', quantity: '' })
@@ -15,20 +16,13 @@ export const useProductCreationLogic = () => {
     const { saveToDB, isSavingDB, errorDB, resetDBStatus } = useSaveProductToDB()
     const productHashRef = useRef<string | null>(null)
 
-    const { refetch: updateId } = useReadContract({
-        address: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: 'productId',
-        query: {
-            enabled: false, // APAGADO POR DEFECTO para evitar llamadas continuas
-        }
-    })
+    const { updateProductId } = useProductMetrics()
 
     useEffect(() => {
         if (isSuccess && txHash && !isSavingDB) {
             const saveInBackend = async () => {
                 try {
-                    const result = await updateId();
+                    const result = await updateProductId();
                     const realIdFromContract = Number(result.data);
 
                     if (!realIdFromContract) {

@@ -49,7 +49,7 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
 
                 <div className="flex gap-2 w-full sm:w-auto justify-center md:justify-start">
                     <GenericActionController
-                        buttonText="🔄 Transferir"
+                        buttonText="🔄 Asignar"
                         buttonColor="bg-indigo-500 hover:bg-indigo-600"
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
@@ -61,7 +61,7 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
                         }}
                     />
                     <GenericActionController
-                        buttonText="🗑️ Borrar"
+                        buttonText="🗑️ Baja"
                         buttonColor="bg-rose-400 hover:bg-rose-500"
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}

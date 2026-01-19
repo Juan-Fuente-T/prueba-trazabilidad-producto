@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Modal from '../../ui/Modal'
-import ProductInfoCard from '@/components/products/ProductInfoCard'
+import ProductInfoCard from '@/components/products/modals/ProductInfoCard'
 import { useProductDeleteLogic } from '@/hooks/orchestration/useProductDeleteLogic'
 import { ActionModalProps } from '@/types/operations';
 

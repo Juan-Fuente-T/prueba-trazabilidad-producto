@@ -6,7 +6,7 @@ interface GenericActionControllerProps{
     buttonText: string      // Ej: "Crear Producto"
     buttonColor: string     // Ej: "bg-emerald-500 hover:bg-emerald-600"
     disabled?: boolean
-    preFilledId?: string // Un id prefijado para transferir o borrar
+    preFilledId?: string // Un id prefijado para asignar o bajas
     ModalComponent: React.ComponentType<ActionModalProps>   // El modal que debe abrir (Registro, Borrado, etc)
     onSuccess?: (data?: OperationResult) => void;
 }
