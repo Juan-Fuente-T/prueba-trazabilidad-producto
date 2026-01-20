@@ -23,6 +23,16 @@ public class ProductController {
     private final ProductService productService;
 
     /**
+     * Endpoint de health check.
+     * GET /api/products/health
+     * @return Mensaje de estado si el back está operativo.
+     */
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("STATUS: OK - Backend conectado y escuchando.");
+    }
+
+    /**
      * Endpoint para obtener el catálogo completo.
      * GET /api/products
      * * @return Respuesta estandarizada con la lista de todos los productos.
