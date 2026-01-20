@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { ToastProvider } from '@/context/ToastContext';
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -26,12 +27,14 @@ export default function RootLayout({
         className={`${robotoMono.variable} font-sans antialiased`}
       >
         <Providers>
-          <Header />
-          {/* pt-16 compensa la altura del Header fijo */}
-          <main className="flex-grow pt-16 w-full">
-            {children}
-          </main>
-          <Footer />
+          <ToastProvider>
+            <Header />
+            {/* pt-16 compensa la altura del Header fijo */}
+            <main className="flex-grow pt-16 w-full">
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
         </Providers>
       </body>
     </html>

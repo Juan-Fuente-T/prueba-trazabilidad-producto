@@ -1,4 +1,4 @@
-import ProductView from './ProductView'
+import ProductView from '@/components/products/detail/ProductView'
 interface PageProps {
     params: Promise<{ id: string }>
 }

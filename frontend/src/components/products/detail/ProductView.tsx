@@ -22,7 +22,6 @@ export default function ProductView({ productId}: Props) {
     const handleUpdateData = useCallback((optimisticNewOwner?: string, newEvent?: Event) => {
         // SI HAY DATO NUEVO, LO PINTA AL INSTANTE (OPTIMISTIC UI)
         if (optimisticNewOwner && productDB && newEvent) {
-            console.log("🚀 Aplicando cambio optimista inmediato:", optimisticNewOwner)
             setProductDB({
                 ...productDB,
                 currentOwner: optimisticNewOwner, // Cambia el dueño de modo optimista antes de la confirmación                // Puedes añadir más campos si tu interfaz los necesita (ej: estado: 'TRANSFERRED')
@@ -36,14 +35,13 @@ export default function ProductView({ productId}: Props) {
         // DE FONDO, pide los datos reales a la BD para confirmar
         // Da un pequeño margen al backend Java para terminar de guardar
         setTimeout(() => {
-            console.log("🔄 Sincronizando con BD real...")
             refetchProduct()
             refetchEvents()
         }, 2000)
     }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
 
     if (isLoading && !productDB) {
-        return <div className="mt-20 text-center">Cargando producto...</div>
+        return <div className="mt-20 text-center">Cargando lote...</div>
     }
 
     if (!productDB) {
