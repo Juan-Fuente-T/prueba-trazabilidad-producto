@@ -9,7 +9,7 @@
  */
 import { ProductDB, ProductPayload, TransferProductPayload, DeleteProductPayload } from '@/types/product'
 
-const apiURL = process.env.NEXT_PUBLIC_API_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
+const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
 // ==========================================
 // ESCRITURA (POST) - ACCIONES

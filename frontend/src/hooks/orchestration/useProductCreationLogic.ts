@@ -4,19 +4,30 @@ import { useRegisterProduct } from '@/hooks/blockchain/useRegisterProduct'
 import { useSaveProductToDB } from '@/hooks/api/useSaveProductToDB'
 import { calculateHash } from '@/utils/hashUtils'
 import { fileToBase64 } from '@/utils/fileUtils'
-import { useProductMetrics } from '@/hooks/blockchain/useProductMetrics';
+import { useProductMetrics } from '@/hooks/blockchain/useProductMetrics'
+import { useToast } from '@/context/ToastContext'
+import { ProductUI } from '@/types/product'
 
+interface useProductCreationLogicProps {
+    onOptimisticCreate?: (product: ProductUI) => void;
+    onRollback?: (tempId: string) => void;
+    onSuccess?: () => void;
+}
 
-export const useProductCreationLogic = () => {
+export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSuccess }: useProductCreationLogicProps) => {
     const [formData, setFormData] = useState({ name: '', description: '', quantity: '' })
     const [imageFile, setImageFile] = useState<File | null>(null)
 
     const { address: connectedAddress } = useAccount();
+    const { showToast } = useToast()
+
     const { registerProduct, isPending, isConfirming, isSuccess, error: blockchainError, hash: txHash } = useRegisterProduct()
     const { saveToDB, isSavingDB, errorDB, resetDBStatus } = useSaveProductToDB()
     const productHashRef = useRef<string | null>(null)
+    const tempIdRef = useRef<string | null>(null)
 
     const { updateProductId } = useProductMetrics()
+
 
     useEffect(() => {
         if (isSuccess && txHash && !isSavingDB) {
@@ -57,9 +68,11 @@ export const useProductCreationLogic = () => {
                         creationTxHash: txHash
                     }
                     await saveToDB(payload)
+                    // No hace falta toast aquí si ya lo ve el usuario en la lista con el check verde
+                    // showToast("Producto confirmado y guardado", "success")
                 } catch (e) {
                     console.error("Error crítico orquestación:", e)
-                    // Aquí se podría usar un toast
+                    showToast("Error guardando en base de datos", "error")
                 }
             }
             saveInBackend()
@@ -73,39 +86,77 @@ export const useProductCreationLogic = () => {
         resetDBStatus()
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const productHash = calculateHash(formData.name, formData.description)
-        // Guarda el hash para evitar posibles duplicados
-        productHashRef.current = productHash
-        registerProduct(BigInt(formData.quantity), productHash)
-    }
+        // Genera un ID temporal único
+        const tempId = `temp-${Date.now()}`
+        tempIdRef.current = tempId
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target
-        // Copia todo lo anterior y sobreescribe solo ese campo
-        setFormData(prev => ({ ...prev, [name]: value }))
-    }
-    const isGlobalLoading = isPending || isConfirming || isSavingDB
+        const optimisticPayload: ProductUI = {
+            blockchainId: tempId,
+            name: formData.name,
+            description: formData.description,
+            quantity: Number(formData.quantity),
+            currentOwner: connectedAddress || '',
+            timestamp: Date.now(),
+            active: true,
+            // Para ver la imagen al instante sin esperar conversión Base64
+            imageUrl: imageFile ? URL.createObjectURL(imageFile) : '',
+            isVerified: false,
+            isOptimistic: true
+        }
 
-    return {
-        formData,
-        imageFile,
-        txHash,
-        setImageFile,
-        handleChange,
-        handleSubmit,
-        resetForm,
-        status: {
-            isPending,
-            isConfirming,
-            isSuccess,
-            isSavingDB,
-            isGlobalLoading
-        },
-        errors: {
-            blockchainError,
-            errorDB
+        try {
+            // UI Optimista
+            if (onOptimisticCreate) {
+                onOptimisticCreate(optimisticPayload)
+            }
+
+            // Cierra modal o avisa al usuario (Depende de decisión de UX)
+            if (onSuccess) onSuccess();
+            showToast("Creando producto...", "info")
+
+            const productHash = calculateHash(formData.name, formData.description)
+            // Guarda el hash para evitar posibles duplicados
+            productHashRef.current = productHash
+            // LLama al guardado en Blockchain
+            await registerProduct(BigInt(formData.quantity), productHash)
+
+            showToast("Transacción enviada. Esperando confirmación...", "info");
+        } catch (error) {
+            console.log("Cancelado/Error");
+            // Esto borra el cambio optimista falso si la creación falla
+            if (onRollback) {
+                onRollback(tempId)
+            } showToast("Operación cancelada", "error");
         }
     }
+
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            const { name, value } = e.target
+            // Copia todo lo anterior y sobreescribe solo ese campo
+            setFormData(prev => ({ ...prev, [name]: value }))
+        }
+        const isGlobalLoading = isPending || isConfirming || isSavingDB
+
+        return {
+            formData,
+            imageFile,
+            txHash,
+            setImageFile,
+            handleChange,
+            handleSubmit,
+            resetForm,
+            status: {
+                isPending,
+                isConfirming,
+                isSuccess,
+                isSavingDB,
+                isGlobalLoading
+            },
+            errors: {
+                blockchainError,
+                errorDB
+            }
+        }
 }

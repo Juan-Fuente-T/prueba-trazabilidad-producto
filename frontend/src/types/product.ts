@@ -1,6 +1,6 @@
 export interface ProductDB {
-    id?: string  // ID de Mongo
-    blockchainId: number
+    id?: string | string // ID de Mongo
+    blockchainId: number | string
     quantity: number
     characterizationHash?: string
     currentOwner: string
@@ -25,14 +25,19 @@ export interface ProductPayload {
 }
 
 export interface TransferProductPayload {
-    blockchainId: number;
+    blockchainId: number | string;
     txHash: string;
     newOwnerAddress: string;
     expectedProductHash: string;
 }
 
 export interface DeleteProductPayload {
-    blockchainId: number;
+    blockchainId: number | string;
     txHash: string;
     expectedProductHash: string;
+}
+// Interface para UI optimista que se anticipa a la respuesta desde blockchain
+export interface ProductUI extends ProductDB {
+    isVerified?: boolean;
+    isOptimistic?: boolean;
 }

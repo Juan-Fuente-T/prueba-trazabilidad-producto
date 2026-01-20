@@ -1,6 +1,6 @@
 export interface Event {
     id: string
-    productBlockchainId: number
+    productBlockchainId: number | string
     transactionHash: string
     productHash: string
     fromAddress: string

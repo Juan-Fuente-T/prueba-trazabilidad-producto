@@ -1,7 +1,7 @@
 import { Event, TypeEvent } from '@/types/events'
 
 export const createOptimisticEvent = (
-    productBlockchainId: number,
+    productBlockchainId: number | string,
     txHash: string = "0xPendiente...", // Hash temporal
     productHash: string,
     type: TypeEvent,

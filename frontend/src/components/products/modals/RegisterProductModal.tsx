@@ -6,8 +6,6 @@ import ImageUpload from '@/components/ui/ImageUpload'
 import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreationLogic'
 import { ActionModalProps } from '@/types/operations';
 
-
-
 {/* 1. Diccionario Industrial (Naming)
       Para que no parezca una tienda online:
       Dueño => Custodio Actual o Operador Responsable.
@@ -15,9 +13,8 @@ import { ActionModalProps } from '@/types/operations';
       Cantidad => Unidades / Volumen.
       Crear => Registrar Lote. */}
 
-
-export default function RegisterProductModal({ isOpen, onClose, onSuccess }: ActionModalProps) {
-  const {
+export default function RegisterProductModal({ isOpen, onClose, onSuccess, onOptimisticCreate, onRollback }: ActionModalProps) {
+const {
     formData,
     imageFile,
     txHash,
@@ -27,12 +24,14 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
     resetForm,
     status,
     errors
-    // } = useProductCreationLogic(onClose)
-  } = useProductCreationLogic()
-
+  } = useProductCreationLogic({
+      onOptimisticCreate: onOptimisticCreate,
+      onRollback: (tempId) => {
+          if (onRollback) onRollback(tempId, 'create')
+      }
+  })
   //Util para evitar notificaciones duplicadas y re-renderizados de estas
   const hasNotifiedRef = useRef(false)
-
   // Limpieza al cerrar
   useEffect(() => {
     if (!isOpen) {
@@ -63,7 +62,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
             value={formData.name}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
-            placeholder='Nombre del producto...'
+            placeholder='Nombre del lote...'
             required
           />
         </div>
@@ -90,7 +89,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
             cols={12}
             value={formData.description}
             onChange={handleChange}
-            placeholder="Escribe tu mensaje..."
+            placeholder="Escribe la descripción..."
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
             required>
           </textarea>
@@ -133,7 +132,7 @@ export default function RegisterProductModal({ isOpen, onClose, onSuccess }: Act
               className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!formData.quantity || !formData.name || status.isGlobalLoading}
             >
-              {status.isGlobalLoading ? 'Procesando...' : 'Registrar Producto'}
+              {status.isGlobalLoading ? 'Procesando...' : 'Registrar Lote'}
             </button>
           )
         )}

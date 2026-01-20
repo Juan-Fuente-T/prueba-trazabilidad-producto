@@ -79,7 +79,7 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
                     />
                     {!isConnected &&
                         <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
-                            Conecta tu wallet para operar
+                            Conéctate para operar
                         </span>
                     }
                 </div>

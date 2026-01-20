@@ -118,7 +118,7 @@ export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate
                                     </div>
                                     {/* Custodio */}
                                     <div>
-                                        <p className="text-[10px] font-bold text-acero-400 uppercase">Custodia</p>
+                                        <p className="text-[10px] font-bold text-acero-400 uppercase">Custodio</p>
                                         <p className="text-xs font-mono font-bold text-acero-700 truncate" title={productDB?.currentOwner}>
                                             {shortenAddress(productDB?.currentOwner)}
                                         </p>

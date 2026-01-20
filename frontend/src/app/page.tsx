@@ -12,6 +12,7 @@ export default function Home() {
   const {
     productListDB,
     handleOptimisticUpdate,
+    optimisticActions,
     refecth,
     isLoading,
     error
@@ -39,6 +40,10 @@ export default function Home() {
                   ModalComponent={RegisterProductModal}
                   disabled={!isConnected}
                   preFilledId="" // Relleno para cumplir con la interfaz
+                  modalProps={{
+                    onOptimisticCreate: optimisticActions.create,
+                    onRollback: optimisticActions.rollback
+                  }}
                   onSuccess={() => {
                     // espera 2 segundos a que el Backend indexe y RECARGA la lista.
                     setTimeout(() => {
@@ -48,7 +53,7 @@ export default function Home() {
                 />
               ) : (
                 <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
-                  Conecta tu wallet para operar
+                  Conéctate para operar
                 </span>
               )
               }

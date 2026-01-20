@@ -6,7 +6,7 @@ interface ImageUploadProps {
 export default function ImageUpload({ file, onFileChange }: ImageUploadProps) {
     return (
         <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Imagen del Producto</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Imagen del lote</label>
             <div className="relative border-2 border-dashed border-gray-300 rounded-md p-6 hover:bg-gray-50 transition-colors">
                 <input
                     type="file"

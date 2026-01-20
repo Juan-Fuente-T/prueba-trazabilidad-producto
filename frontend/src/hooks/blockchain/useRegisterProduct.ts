@@ -6,7 +6,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 
 export function useRegisterProduct() {
     const {
-        writeContract,
+        writeContractAsync,
         data: hash,
         isPending,
         error
@@ -16,8 +16,8 @@ export function useRegisterProduct() {
         hash,
     })
 
-    const registerProduct = (quantity: bigint, characterizationHash: `0x${string}`) => {
-        writeContract({
+    const registerProduct = async (quantity: bigint, characterizationHash: `0x${string}`) => {
+        return await writeContractAsync({
             address: CONTRACT_ADDRESS,
             abi: CONTRACT_ABI,
             functionName: 'registerProduct',

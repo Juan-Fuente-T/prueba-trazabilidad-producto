@@ -1,4 +1,4 @@
-// hooks/useRegisterProduct.ts
+// hooks/useTransferProduct.ts
 'use client'
 
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
