@@ -4,12 +4,20 @@ import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
 import { useTransferProduct } from '@/hooks/blockchain/useTransferProduct'
 import { useTransferProductToDB } from '@/hooks/api/useTransferProductToDB'
+import { useToast } from '@/context/ToastContext'
+import { ProductUI } from '@/types/product'
 
+interface UseProductTransferLogicProps {
+    onOptimisticUpdate?: (product: Partial<ProductUI>) => void;
+    onRollback?: (tempId: string) => void;
+    onSuccess?: () => void;
+}
 // export const useProductTransferLogic = (onClose: () => void) => {
-export const useProductTransferLogic = () => {
+export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSuccess }: UseProductTransferLogicProps) => {
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
     const router = useRouter()
+    const { showToast } = useToast()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
@@ -51,14 +59,40 @@ export const useProductTransferLogic = () => {
         }
     }, [isSuccess, txHash])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // const handleSubmit = (e: React.FormEvent) => {
+    //     e.preventDefault()
+
+    //     if (!productId || !newOwner) return
+    //     //Todo: validar que el id no sea de un producto ya borrado
+    //     transferProduct(BigInt(productId), newOwner as `0x${string}`)
+    // }
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!productId || !newOwner) return
-        //Todo: validar que el id no sea de un producto ya borrado
-        transferProduct(BigInt(productId), newOwner as `0x${string}`)
-    }
 
+        try {
+            // 🔥 1. UI OPTIMISTA: CAMBIAMOS DUEÑO YA
+            if (onOptimisticUpdate) {
+                onOptimisticUpdate({
+                    blockchainId: productId,
+                    currentOwner: newOwner,
+                    isVerified: false
+                })
+            }
+            if (onSuccess) onSuccess();
+            showToast("Transferencia enviada a Blockchain...", "info");
+
+            await transferProduct(BigInt(productId), newOwner as `0x${string}`)
+
+        } catch (error) {
+            console.error("Error al transferir:", error);
+            showToast("Error en la transferencia", "error");
+            if (onRollback) {
+                onRollback(productId)
+            }
+        }
+    }
     return {
         product,
         productDB,

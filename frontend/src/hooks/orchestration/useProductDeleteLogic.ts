@@ -1,14 +1,26 @@
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
 import { useDeleteProduct } from '@/hooks/blockchain/useDeleteProduct'
 import { useDeleteProductToDB } from '@/hooks/api/useDeleteProductToDB'
+import { useToast } from '@/context/ToastContext'
 
-export const useProductDeleteLogic = (onClose: () => void) => {
+interface UseProductDeleteLogicProps {
+    onOptimisticDelete?: (id: string | number) => void;
+    onRollback?: (id: string | number) => void;
+    onSuccess?: () => void; // Para cerrar el modal
+}
+// export const useProductDeleteLogic = (onClose: () => void) => {
 // export const useProductDeleteLogic = () => {
+export const useProductDeleteLogic = ({
+    onOptimisticDelete,
+    onRollback,
+    onSuccess
+}: UseProductDeleteLogicProps = {}) => {
     const [productId, setProductId] = useState('')
-    const router = useRouter()
+    // const router = useRouter()
+    const { showToast } = useToast()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
         productId && productId.trim() !== '' ? BigInt(productId) : undefined
@@ -22,11 +34,11 @@ export const useProductDeleteLogic = (onClose: () => void) => {
 
     const { deleteToDB, isDeletingDB, errorDB } = useDeleteProductToDB()
 
-    // Timer éxito
+    // --- SINCRONIZACIÓN SILENCIOSA CON BD ---
     useEffect(() => {
         if (isSuccess && txHash && !isDeletingDB) {
-            const deleteProduct = async () => {
-            try {
+            const syncDeleteToDB = async () => {
+                try {
                     await deleteToDB({
                         blockchainId: Number(productId),
                         txHash: txHash,
@@ -34,30 +46,50 @@ export const useProductDeleteLogic = (onClose: () => void) => {
                     })
 
                     // Si todo va bien:
-                    router.refresh() // Refresca la lista de productos
+                    // router.refresh() // Refresca la lista de productos
 
                     // Cierra el modal tras un pequeño delay
-                    setTimeout(() => {
-                        setProductId('')
-                        onClose()
-                    }, 2000)
+                    // setTimeout(() => {
+                    //     setProductId('')
+                    //     onClose()
+                    // }, 2000)
 
                 } catch (e) {
                     console.error("Falló la eliminación del producto", e)
-                    // Aquí el usuario verá el errorDB gracias al return de abajo
+                    // El error se guarda en errorDB y se podría mostrar un toast aquí si se quisiera
                 }
             }
 
-            deleteProduct()
+            syncDeleteToDB()
         }
     }, [isSuccess, txHash])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!productId || !isOwner) return
-        //Todo: validar que el id no se de un producto ya borrado
-        deleteProduct(BigInt(productId))
+
+        try {
+            // UI OPTIMISTA: Lo borra de la vista YA
+            if (onOptimisticDelete) {
+                onOptimisticDelete(productId)
+            }
+            // UX: CERRAR MODAL Y AVISAR
+            // Cierra inmediatamente para que el usuario vea la lista actualizada
+            if (onSuccess) onSuccess();
+            showToast("Solicitud de baja enviada a Blockchain...", "info");
+
+            await deleteProduct(BigInt(productId))
+
+        } catch (error) {
+            console.error("Error al borrar:", error);
+            showToast("Error al procesar la baja", "error");
+
+            // ROLLBACK (Si falla, que vuelva a aparecer)
+            if (onRollback) {
+                onRollback(productId)
+            }
+        }
     }
 
     return {

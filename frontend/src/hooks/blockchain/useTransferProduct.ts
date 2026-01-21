@@ -6,7 +6,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 
 export function useTransferProduct() {
     const {
-        writeContract,
+        writeContractAsync,
         data: hash,
         isPending,
         error
@@ -16,8 +16,8 @@ export function useTransferProduct() {
         hash,
     })
 
-    const transferProduct = (id: bigint, newOwner: `0x${string}`) => {
-        writeContract({
+    const transferProduct = async (id: bigint, newOwner: `0x${string}`) => {
+        return await writeContractAsync ({
             address: CONTRACT_ADDRESS,
             abi: CONTRACT_ABI,
             functionName: 'transferProduct',

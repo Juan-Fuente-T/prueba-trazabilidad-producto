@@ -41,7 +41,7 @@ export default function ProductView({ productId}: Props) {
     }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
 
     if (isLoading && !productDB) {
-        return <div className="mt-20 text-center">Cargando lote...</div>
+        return <div className="mt-20 mb-20 text-center text-acero-700 text-lg">Cargando lote...</div>
     }
 
     if (!productDB) {

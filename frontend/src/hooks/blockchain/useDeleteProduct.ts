@@ -6,7 +6,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/config/contract'
 
 export function useDeleteProduct() {
     const {
-        writeContract,
+        writeContractAsync,
         data: hash,
         isPending,
         error
@@ -16,8 +16,8 @@ export function useDeleteProduct() {
         hash,
     })
 
-    const deleteProduct = (id: bigint) => {
-        writeContract({
+    const deleteProduct = async (id: bigint) => {
+        return await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'deleteProduct',

@@ -5,26 +5,23 @@ import TransferProductModal from '@/components/products/modals/TransferProductMo
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
 import { useAccount } from 'wagmi'
-import { OperationResult, OperationResultWithID } from '@/types/operations';
+import { ProductUI} from '@/types/product'
 
 interface QuickOperationsPanelProps {
-    onOperationSuccess?: (type: 'TRANSFER' | 'DELETE', data: OperationResultWithID) => void
+    actions?: {
+        create: (p: ProductUI) => void;
+        transfer: (data: { id: string | number, newOwner: string }) => void;
+        delete: (id: string | number) => void;
+        rollback: (id: string | number, type: 'create' | 'transfer' | 'delete') => void;
+    };
 }
 
-export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperationsPanelProps) {
+export default function QuickOperationsPanel({ actions }: QuickOperationsPanelProps) {
     const [targetId, setTargetId] = useState('')
     const { isConnected } = useAccount()
 
-    // Esta función que se pasa al Modal SOLO en el buscador
-    const handleSearchSuccess = (actionType: 'TRANSFER' | 'DELETE', payload: OperationResult) => {
-        // Optimistic UI en el resultado de búsqueda
-        if (onOperationSuccess && targetId) {
-            const dataFinal: OperationResultWithID = {
-                id: targetId,// El ID del estado
-                ...payload // Se añade lo que viene del modal (newOwner, etc)
-            };
-            onOperationSuccess(actionType, dataFinal);
-        }
+    // Función simple para limpiar el input cuando el modal termine
+    const handleModalClose = () => {
         setTargetId('')
     }
 
@@ -41,7 +38,7 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
 
             <div className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="w-full sm:w-48">
-                    <label className="text-xs text-stone-400 block mb-1">ID del Producto</label>
+                    <label className="text-xs text-stone-400 block mb-1">ID del Lote</label>
                     <input
                         type="number"
                         placeholder="Ej: 5"
@@ -59,10 +56,19 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
-                        onSuccess={(data) => {
-                            if (data && onOperationSuccess) {
-                                handleSearchSuccess('TRANSFER', data)
-                            }
+                        // AL TERMINAR: Limpia el input
+                        onSuccess={handleModalClose}
+                        // LÓGICA OPTIMISTA de asignación
+                        modalProps={{
+                            onOptimisticUpdate: (prod) => {
+                                if (actions?.transfer && prod.blockchainId && prod.currentOwner) {
+                                    actions.transfer({
+                                        id: prod.blockchainId,
+                                        newOwner: prod.currentOwner
+                                    })
+                                }
+                            },
+                            onRollback: (id) => actions?.rollback(id, 'transfer')
                         }}
                     />
                     <GenericActionController
@@ -71,10 +77,14 @@ export default function QuickOperationsPanel({ onOperationSuccess }: QuickOperat
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
-                        onSuccess={(data) => {
-                            if (data && onOperationSuccess) {
-                                handleSearchSuccess('DELETE', data)
-                            }
+                        // AL TERMINAR: Limpia el input
+                        onSuccess={handleModalClose}
+                        // LÓGICA OPTIMISTA de borrado
+                        modalProps={{
+                            onOptimisticDelete: (id) => {
+                                if (actions?.delete) actions.delete(id)
+                            },
+                            onRollback: (id) => actions?.rollback(id, 'delete')
                         }}
                     />
                     {!isConnected &&

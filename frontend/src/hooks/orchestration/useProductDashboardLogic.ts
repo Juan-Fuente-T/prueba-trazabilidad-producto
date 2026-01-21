@@ -1,13 +1,12 @@
-import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB' // Tu hook de DB
+import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB'
 import { useProductEventsVerifier } from '@/hooks/blockchain/useProductEventsVerifier'
-import { OperationResultWithID } from '@/types/operations'
 import { ProductUI } from '@/types/product'
 import { Event } from '@/types/events'
 
 export function useProductDashboardLogic() {
-    const { productListDB, setProductListDB, isLoading, error, refecth} = useGetProductListFromDB()
+    const { productListDB, setProductListDB, isLoading, error, refecth } = useGetProductListFromDB()
 
-    // Confirmamos los datos actuales desde el evento en blockchain
+    // Confirma los datos actuales desde el evento en blockchain
     const handleBlockchainEvent = (data: Partial<Event>) => {
 
         setProductListDB((prevList: ProductUI[]) => {
@@ -24,7 +23,7 @@ export function useProductDashboardLogic() {
                                 isVerified: true
                             }
                         }
-                        // Si no coincidía, actualiza a la fuerza
+                        // Si no coincide, actualiza a la fuerza
                         return {
                             ...product,
                             currentOwner: data.toAddress,
@@ -52,37 +51,33 @@ export function useProductDashboardLogic() {
     )
 
     // Lógica Optimista: Datos guardados antes de la confirmación desde blockchain
-    const handleOptimisticUpdate = (type: 'TRANSFER' | 'DELETE', data: OperationResultWithID) => {
-        setProductListDB((prevList) => {
-            return prevList.map(product => {
-                // Buscamos por el ID de blockchain
-                if (String(product.blockchainId) === String(data.id)) {
-
-                    // Actualización inmediata (Optimista)
-                    if (type === 'TRANSFER' && 'newOwner' in data) {
-                        return {
-                            ...product,
-                            currentOwner: data.newOwner,
-                            isVerified: false
-                        }
-                    }
-
-                    if (type === 'DELETE') {
-                        return {
-                            ...product,
-                            currentOwner: product.currentOwner,
-                            active: false,
-                            isVerified: false
-                        }
-                    }
+    const optimisticTransfer = (data: { id: string | number, newOwner: string }) => {
+        setProductListDB((prev) => prev.map(p => {
+            if (String(p.blockchainId) === String(data.id)) {
+                return {
+                    ...p,
+                    currentOwner: data.newOwner,
+                    isVerified: false
                 }
-                return product
-            })
-        })
+            }
+            return p
+        }))
     }
-
+    // Función para eliminar el producto visualmente al instante
+    const optimisticDelete = (id: string | number) => {
+        setProductListDB((prev) => prev.map(p => {
+            if (String(p.blockchainId) === String(id)) {
+                return {
+                    ...p,
+                    active: false,
+                    isVerified: false
+                }
+            }
+            return p
+        }))
+    }
     // Función para añadir el producto visualmente al instante
-    const handleOptimisticCreate = (newProduct: ProductUI) => {
+    const optimisticCreate = (newProduct: ProductUI) => {
         // Al crear, entra como NO verificado por defecto
         const visualProduct: ProductUI = {
             ...newProduct,
@@ -91,35 +86,27 @@ export function useProductDashboardLogic() {
         setProductListDB((prevList) => [visualProduct, ...prevList])
     }
     // Función para deshacer si falla la transacción(Rollback)
-    const handleRollback = (id: string | number, type: 'create' | 'update' | 'delete') => {
-        setProductListDB((prevList) => {
-            if (type === 'create') {
-                return prevList.filter(p => String(p.blockchainId) !== String(id))
-            }
+    const optimisticRollback = (id: string | number, type: 'create' | 'transfer' | 'delete') => {
 
-            // CASO 2 y 3 (Update/Delete):
-            // Como tu 'handleOptimisticUpdate' ya modifica el estado, para revertir
-            // se necesita la data original. De momento, si falla un Transfer, el usuario
-            // verá el estado "No verificado" hasta que recargue o llegue el evento real.
-            return prevList
-        })
+        // Si es CREATE (aún no existe en BD), se borra de la lista visualmente
+        if (type === 'create') {
+            setProductListDB((prev) => prev.filter(p => String(p.blockchainId) !== String(id)))
+            return;
+        }
+        // Si es TRANSFER o DELETE (ya existía en BD) Se pide a la BD los datos reales de nuevo.
+        refecth();
     }
-
-    // const addNewProductToState = (newProduct: ProductUI) => {
-    //     setProductListDB((prevList) => [...prevList, newProduct])
-    // }
 
     return {
         productListDB,
-        handleOptimisticUpdate,
-        // addNewProductToState,
         refecth,
-        optimisticActions: {
-            create: handleOptimisticCreate,
-            update: handleOptimisticUpdate,
-            rollback: handleRollback
-        },
         isLoading,
-        error
+        error,
+        optimisticActions: {
+            create: optimisticCreate,
+            transfer: optimisticTransfer,
+            delete: optimisticDelete,
+            rollback: optimisticRollback
+        }
     }
 }

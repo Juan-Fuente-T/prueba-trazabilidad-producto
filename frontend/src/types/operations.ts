@@ -1,4 +1,4 @@
-import { ProductDB } from './product'
+import { ProductDB, ProductUI } from './product'
 // Lo que devuelve el modal de Transferencia al tener éxito
 export interface TransferSuccessData {
     newOwner: string;
@@ -26,7 +26,7 @@ export interface ActionModalProps {
     preFilledId?: string;
     onSuccess: (data?: OperationResult) => void;
     onOptimisticCreate?: (newProduct: ProductDB) => void;
-    onOptimisticUpdate?: (updatedProduct: ProductDB) => void;
+    onOptimisticUpdate?: (updatedProduct: Partial<ProductUI>) => void;
     onOptimisticDelete?: (productId: string | number) => void;
-    onRollback?: (productId: string | number, type: 'create' | 'update' | 'delete') => void;
+    onRollback?: (productId: string | number, type: 'create' | 'transfer' | 'delete') => void;
 }

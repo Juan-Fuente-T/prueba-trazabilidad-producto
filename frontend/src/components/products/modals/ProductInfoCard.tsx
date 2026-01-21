@@ -51,9 +51,8 @@ export default function ProductInfoCard({
                             ⚠️ Vas a eliminar permanentemente:
                         </p>
                     )}
-
-                    {/* <div className="grid grid-cols-[80px_1fr] gap-y-1 text-acero-700 no-wrap w-full border"> */}
-                    <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-acero-700 w-full border">
+                    {/* Contenido */}
+                    <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-acero-700 w-full">
                         <span className="font-semibold text-acero-500 whitespace-nowrap">Referencia:</span>
                         <span className="font-bold text-acero-900">
                             {loadingDB ? "Cargando..." : productDB?.name || "(Desconocido)"}
@@ -84,7 +83,7 @@ export default function ProductInfoCard({
             {productId && !product && !isLoadingBlockchain && (
                 <div className="text-center p-4">
                     <p className="text-red-500 text-lg font-bold bg-red-50 px-4 py-2 rounded-md border border-red-100">
-                        ❌ El producto ID {productId} no existe
+                        ❌ El lote ID {productId} no existe
                     </p>
                 </div>
             )}

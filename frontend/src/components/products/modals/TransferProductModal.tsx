@@ -7,7 +7,7 @@ import RoleSelectorButtons from '@/components/products/modals/RoleSelectorButton
 import { useProductTransferLogic } from '@/hooks/orchestration/useProductTransferLogic'
 import { ActionModalProps } from '@/types/operations';
 
-export default function TransferProductModal({ isOpen, onClose, preFilledId, onSuccess }: ActionModalProps) {
+export default function TransferProductModal({ isOpen, onClose, preFilledId, onSuccess, onOptimisticUpdate, onRollback }: ActionModalProps) {
     const {
         product,
         productDB,
@@ -20,7 +20,13 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
         handleSubmit,
         status,
         errors
-    } = useProductTransferLogic()
+    } = useProductTransferLogic({
+        onOptimisticUpdate: onOptimisticUpdate,
+        onSuccess: onClose,
+        onRollback: (tempId) => {
+            if (onRollback) onRollback(tempId, 'transfer')
+        }
+    })
 
     // Hace seguimiento de la notificacion de éxito y llamar a onSuccess solo 1 vez
     const hasNotifiedRef = useRef(false)
@@ -35,7 +41,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                 setProductId('')
             }
         }
-        }, [isOpen, preFilledId])
+    }, [isOpen, preFilledId])
 
     useEffect(() => {
         // Si hay éxito real y NO se ha notificado todavía...
@@ -46,18 +52,18 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
             //     onClose()
             // }, 2000)
             // return () => clearTimeout(timer)
-            onSuccess({newOwner: newOwner, txHash: txHash || "0xHashNoDisponible"})
+            onSuccess({ newOwner: newOwner, txHash: txHash || "0xHashNoDisponible" })
         }
         // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
     }, [status.isSuccess, status.isTransferingDB, newOwner, onSuccess])
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Asignar Producto">
+        <Modal isOpen={isOpen} onClose={onClose} title="Asignar Lote">
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {/* INPUT ID */}
                 <div>
-                    <label className="block text-sm font-medium mb-1">ID del Producto</label>
+                    <label className="block text-sm font-medium mb-1">ID del Lote</label>
                     <input
                         type="number"
                         value={productId}
@@ -86,14 +92,14 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                 />
 
                 {/* INPUT MANUAL DE ADDRESS*/}
-                <input
+                {/* <input
                     type="text"
                     value={newOwner}
                     onChange={(e) => setNewOwner(e.target.value)}
                     className="w-full border-b border-gray-300 py-1 text-sm focus:outline-none focus:border-indigo-500"
                     placeholder="O dirección manual (0x...)"
                     required
-                />
+                /> */}
 
                 {/* MOSTRAR ERRORES */}
                 {/* Filtra error de lectura, "revert", que ya se esta gestionando*/}
@@ -107,7 +113,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                 )}
 
                 {status.isSuccess ? (
-                    <p className="text-green-600 font-bold text-center">✅ Transferencia completada</p>
+                    <p className="text-green-600 font-bold text-center">✅ Asignación completada</p>
                 ) : (
                     //* BOTÓN Asignacion
                     <button
@@ -115,7 +121,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                         className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
                         disabled={!productId || !newOwner || !isOwner || status.isPending || status.isConfirming || status.isTransferingDB}
                     >
-                        {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Asinar Producto'}
+                        {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Asignar Lote'}
                     </button>
                 )}
             </form>

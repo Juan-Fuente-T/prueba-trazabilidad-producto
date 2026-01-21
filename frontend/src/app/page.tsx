@@ -11,7 +11,6 @@ export default function Home() {
   const { isConnected } = useAccount()
   const {
     productListDB,
-    handleOptimisticUpdate,
     optimisticActions,
     refecth,
     isLoading,
@@ -62,7 +61,7 @@ export default function Home() {
         </div>
 
         {/* ZONA DE OPERACIONES RÁPIDAS*/}
-        <QuickOperationsPanel onOperationSuccess={handleOptimisticUpdate} />
+        <QuickOperationsPanel actions={optimisticActions} />
 
         {/* ZONA DE EXPLORACIÓN DE PRODUCTOS*/}
         <div className="mt-8">

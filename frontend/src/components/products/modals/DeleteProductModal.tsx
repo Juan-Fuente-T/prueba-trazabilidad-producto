@@ -6,7 +6,7 @@ import ProductInfoCard from '@/components/products/modals/ProductInfoCard'
 import { useProductDeleteLogic } from '@/hooks/orchestration/useProductDeleteLogic'
 import { ActionModalProps } from '@/types/operations';
 
-export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuccess }: ActionModalProps) {
+export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuccess, onOptimisticDelete, onRollback }: ActionModalProps) {
     const {
         product,
         productDB,
@@ -17,7 +17,13 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
         handleSubmit,
         status,
         errors
-    } = useProductDeleteLogic(onClose)
+    } = useProductDeleteLogic({
+        onOptimisticDelete,
+        onSuccess: onClose,
+        onRollback: (id) => {
+            if (onRollback) onRollback(id, 'delete')
+        }
+    })
 
     //Util para evitar notificaciones duplicadas y re-renderizados de estas
     const hasNotifiedRef = useRef(false)
