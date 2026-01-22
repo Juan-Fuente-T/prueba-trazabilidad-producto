@@ -10,12 +10,12 @@ interface ProductHistoryProps {
 export default function ProductHistory({ events }: ProductHistoryProps) {
 
     if (!events || events.length === 0) {
-        return <div className="text-stone-400 text-sm md:text-xl font-semibold italic p-4">No hay historial registrado.</div>
+        return <div className="text-acero-400 text-sm md:text-xl font-semibold italic p-4">No hay historial registrado.</div>
     }
 
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-stone-700 border-b border-stone-200 text-center md:text-start p-2 md:pt-4">
+            <h3 className="text-lg font-bold text-acero-700 border-b border-acero-200 text-center md:text-start p-2 md:pt-4">
                 ⏳ Historial de Trazabilidad
             </h3>
             <div className="w-full overflow-x-auto pb-6 custom-scrollbar">
@@ -28,11 +28,11 @@ export default function ProductHistory({ events }: ProductHistoryProps) {
                             {/* 1. LÍNEA CONECTORA (Gris detrás) */}
                             {/* Si no es el último, dibuja línea a la derecha */}
                             {index !== events.length - 1 && (
-                                <div className="absolute top-[14px] left-[50%] w-full h-[2px] bg-stone-300 z-2" />
+                                <div className="absolute top-[14px] left-[50%] w-full h-[2px] bg-acero-300 z-2" />
                             )}
                             {/* Si no es el primero, dibujamos línea a la izquierda (para conectar bien) */}
                             {index !== 0 && (
-                                <div className="absolute top-[14px] right-[50%] w-full h-[2px] bg-stone-300 z-2" />
+                                <div className="absolute top-[14px] right-[50%] w-full h-[2px] bg-acero-300 z-2" />
                             )}
 
                             {/* PUNTO CENTRAL - ICONO */}

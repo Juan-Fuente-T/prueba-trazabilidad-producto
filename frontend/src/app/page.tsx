@@ -19,15 +19,15 @@ export default function Home() {
   } = useProductDashboardLogic()
 
   return (
-    <main className="min-h-screen bg-stone-50 ">
+    <main className="min-h-screen bg-acero-50 ">
       <div className="container mx-auto px-4 py-8">
         {/* CABECERA*/}
         <div className="flex  flex-col justify-between items-end">
-          <div className="w-full border-b border-stone-200 pb-4 mt-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 tracking-tight">
+          <div className="w-full border-b border-acero-200 pb-4 mt-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-acero-800 tracking-tight">
               Sistema de Trazabilidad de Lotes
             </h1>
-            <p className="text-stone-500 mt-1 text-sm">
+            <p className="text-acero-500 mt-1 text-sm">
               Gestión certificada de inventario y cadena de custodia.
             </p>
           </div>
@@ -35,8 +35,8 @@ export default function Home() {
           {/* 2. BARRA SUPERIOR: BOTÓN DE CREAR */}
           <div className="flex justify-between items-center mx-auto mt-4 mb-8 sm:mb-12 w-full">
             <div>
-              <h1 className="text-3xl font-bold text-stone-800">Inventario</h1>
-              <p className="text-stone-500">Panel de Control</p>
+              <h1 className="text-3xl font-bold text-acero-800">Inventario</h1>
+              <p className="text-acero-500">Panel de Control</p>
             </div>
             <div className="flex flex-col items-center mb-6">
               {isConnected ? (
@@ -63,7 +63,7 @@ export default function Home() {
                   }}
                 />
               ) : (
-                <span className="text-stone-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-stone-100 rounded-md">
+                <span className="text-acero-400 text-sm md:text-md font-semibold italic mt-2 px-2 py-1 text-wrap bg-acero-100 rounded-md">
                   Conéctate para operar
                 </span>
               )
@@ -78,9 +78,9 @@ export default function Home() {
         {/* ZONA DE EXPLORACIÓN DE PRODUCTOS*/}
         <div className="mt-8">
           {error && <p className="text-red-500 mb-4 bg-red-50 p-2 rounded">{error}</p>}
-          <h2 className="text-lg font-bold text-stone-700 mb-4">Catálogo de Activos</h2>
+          <h2 className="text-lg font-bold text-acero-700 mb-4">Catálogo de Activos</h2>
           {isLoading ? (
-            <p className="text-center py-10 text-stone-500">Cargando...</p>
+            <p className="text-center py-10 text-acero-500">Cargando...</p>
           ) : (
             <ProductList products={productListDB || []} />
           )}

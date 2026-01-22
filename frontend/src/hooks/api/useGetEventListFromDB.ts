@@ -28,7 +28,7 @@ export function useGetEventListFromDB(productId: string) {
             setEventListDB(sortedData || [])
 
             if (!data) {
-                setError("Lista de productos no encontrado en BD")
+                setError("Lista de lotes no encontrado en BD")
             }
         } catch (err: Error | unknown) {
             console.error("Error en useGetProductListFromDB:", err)

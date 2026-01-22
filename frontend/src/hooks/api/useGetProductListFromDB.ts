@@ -19,7 +19,7 @@ export default function useGetProductListFromDB() {
                 setProductListDB(data || [])
 
                 if (!data) {
-                    setError("Lista de productos no encontrado en BD")
+                    setError("Listado de lotes no encontrado en BD")
                 }
             } catch (err: Error | unknown) {
                 console.error("Error en useGetProductListFromDB:", err)

@@ -86,7 +86,7 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
                 {/* Mensajes Éxito/Error Acción */}
                 {status.isSuccess ? (
                     <p className="text-green-600 font-bold text-center bg-green-50 p-3 rounded border border-green-200">
-                        🗑️ Producto eliminado correctamente.
+                        🗑️ Lote eliminado correctamente.
                     </p>
                 ) : (
                     <div className="space-y-2">

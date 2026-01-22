@@ -96,7 +96,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                     type="text"
                     value={newOwner}
                     onChange={(e) => setNewOwner(e.target.value)}
-                    className="w-full border-b border-gray-300 py-1 text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full border-b border-acero-300 py-1 text-sm focus:outline-none focus:border-indigo-500"
                     placeholder="O dirección manual (0x...)"
                     required
                 /> */}

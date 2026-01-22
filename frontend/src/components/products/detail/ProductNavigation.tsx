@@ -13,7 +13,7 @@ export default function ProductNavigation({ currentId }: ProductNavigationProps)
         <div className="flex justify-between items-center mb-6 max-w-5xl mx-auto">
 
             {/* Botón Volver */}
-            <Link href="/" className="text-stone-500 hover:text-emerald-600 flex items-center gap-2 transition-colors font-medium">
+            <Link href="/" className="text-acero-500 hover:text-emerald-600 flex items-center gap-2 transition-colors font-medium">
                 ← Volver al listado
             </Link>
 
@@ -22,19 +22,19 @@ export default function ProductNavigation({ currentId }: ProductNavigationProps)
                 {prevId ? (
                     <Link
                         href={`/products/${prevId}`}
-                        className="px-4 py-2 bg-white border border-stone-300 rounded-lg text-stone-600 hover:bg-stone-50 hover:text-indigo-600 transition-colors shadow-sm text-sm font-medium"
+                        className="px-4 py-2 bg-white border border-acero-300 rounded-lg text-acero-600 hover:bg-acero-50 hover:text-indigo-600 transition-colors shadow-sm text-sm font-medium"
                     >
                         ← Anterior
                     </Link>
                 ) : (
-                    <span className="px-4 py-2 border border-stone-100 rounded-lg text-stone-300 cursor-not-allowed text-sm">
+                    <span className="px-4 py-2 border border-acero-100 rounded-lg text-acero-300 cursor-not-allowed text-sm">
                         ← Anterior
                     </span>
                 )}
 
                 <Link
                     href={`/products/${nextId}`}
-                    className="px-4 py-2 bg-white border border-stone-300 rounded-lg text-stone-600 hover:bg-stone-50 hover:text-indigo-600 transition-colors shadow-sm text-sm font-medium"
+                    className="px-4 py-2 bg-white border border-acero-300 rounded-lg text-acero-600 hover:bg-acero-50 hover:text-indigo-600 transition-colors shadow-sm text-sm font-medium"
                 >
                     Siguiente →
                 </Link>

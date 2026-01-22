@@ -17,7 +17,7 @@ export function getActorInfo(address: string | undefined) {
     if (!address) return {
         role: "Desconocido",
         status: "❓ Sin Datos",
-        color: "bg-gray-100 text-gray-500 border-gray-200"
+        color: "bg-acero-100 text-acero-500 border-acero-200"
     };
 
     const addr = address.toLowerCase();

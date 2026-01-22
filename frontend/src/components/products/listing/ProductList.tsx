@@ -15,8 +15,8 @@ export default function ProductList({ products }: ProductListProps) {
     // Lógica de Filtrado "Híbrida" (ID o Nombre)
     const filteredProducts = products.filter(product => {
         const term = searchTerm.toLowerCase()
-        const matchesName = product.name.toLowerCase().includes(term)
-        const matchesId = product.blockchainId.toString().includes(term)
+        const matchesName = product.name?.toLowerCase().includes(term)
+        const matchesId = product.blockchainId?.toString().includes(term)
 
         return matchesName || matchesId
     })

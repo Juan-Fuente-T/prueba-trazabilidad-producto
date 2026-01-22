@@ -38,7 +38,7 @@ export default function ProductInfoCard({
 
     return (
         <div
-            className="flex items-center justify-center border border-stone-200 rounded-md transition-all"
+            className="flex items-center justify-center border border-acero-200 rounded-md transition-all"
             style={{ minHeight: minHeight }}
         >
             {/* CASO A: TODO CARGADO Y CORRECTO */}

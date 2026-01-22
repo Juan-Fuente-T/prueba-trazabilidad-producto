@@ -26,7 +26,7 @@ export function useGetProductFromDB(productId?: string | null) {
             setProductDB(data)
 
             if (!data) {
-                setError("Producto no encontrado en BD")
+                setError("Lote no encontrado en BD")
             }
         } catch (err: Error | unknown) {
             console.error("Error en useGetProductFromDB:", err)

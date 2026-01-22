@@ -9,7 +9,7 @@ interface Props {
 export default function RoleSelectorButtons({ isOwner, onSelect }: Props) {
     return (
         <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Nuevo Custodio</label>
+            <label className="block text-sm font-medium text-acero-700">Nuevo Custodio</label>
             <div className="flex flex-col md:flex-row gap-2">
                 <button
                     type="button"

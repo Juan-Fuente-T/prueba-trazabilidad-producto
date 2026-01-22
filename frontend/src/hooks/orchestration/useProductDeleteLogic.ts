@@ -55,7 +55,7 @@ export const useProductDeleteLogic = ({
                     // }, 2000)
 
                 } catch (e) {
-                    console.error("Falló la eliminación del producto", e)
+                    console.error("Falló la eliminación del lote", e)
                     // El error se guarda en errorDB y se podría mostrar un toast aquí si se quisiera
                 }
             }

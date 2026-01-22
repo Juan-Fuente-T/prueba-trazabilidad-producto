@@ -61,7 +61,7 @@ const {
             type="text"
             value={formData.name}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
+            className="w-full border border-acero-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
             placeholder='Nombre del lote...'
             required
           />
@@ -74,7 +74,7 @@ const {
             type="number"
             value={formData.quantity}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
+            className="w-full border border-acero-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
             required
             min={1}
           //Todo: añadir no permitir decimales
@@ -90,7 +90,7 @@ const {
             value={formData.description}
             onChange={handleChange}
             placeholder="Escribe la descripción..."
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
+            className="w-full border border-acero-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
             required>
           </textarea>
         </div>
@@ -118,7 +118,7 @@ const {
         {/* C. Éxito Total */}
         {status.isSuccess && !errors.errorDB && !status.isSavingDB && (
           <p className="text-green-600 font-bold text-center text-lg animate-pulse">
-            ✅ ¡Producto Registrado Exitosamente!
+            ✅ Lote Registrado Exitosamente!
           </p>
         )}
 

@@ -20,7 +20,7 @@ export interface Product {
 }
 
 export interface ProductPayload {
-    product: Omit<ProductDB, 'id' | '_id' | 'blockchainId'> & { blockchainId: number }; // Producto sin ID de mongo
+    product: Omit<ProductDB, 'id' | '_id' | 'blockchainId'> & { blockchainId: number };
     creationTxHash: string;
 }
 

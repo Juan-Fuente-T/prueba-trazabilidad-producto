@@ -19,10 +19,10 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl text-stone-800 font-bold">{title}</h2>
+          <h2 className="text-xl text-acero-800 font-bold">{title}</h2>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white bg-stone-500 hover:bg-stone-700 p-1 rounded-full w-8 h-8 flex items-center justify-center transition-colors cursor-pointer"
+            className="text-white/80 hover:text-white bg-acero-500 hover:bg-acero-700 p-1 rounded-full w-8 h-8 flex items-center justify-center transition-colors cursor-pointer"
           >
             ✕
           </button>

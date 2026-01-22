@@ -44,7 +44,7 @@ export function usePendingHashVerifier({pendingItems, onItemVerified} : usePendi
                     });
 
                     if (match) {
-                        console.log(`✅ VERIFICADO: Producto ${item.id}`);
+                        console.log(`✅ VERIFICADO: Lote ${item.id}`);
                         callbackRef.current(item.id);
                     }
                 } catch (error) {

@@ -100,7 +100,7 @@ export function useProductDashboardLogic() {
     // ACTUALIZACIÓN DE HASH PENDIENTE
     // -----------------------------------------------------------------------
     const attachPendingHash = (id: string | number, txHash: string) => {
-        console.log(`🔌 Hash ${txHash} acoplado al producto ${id}`);
+        console.log(`🔌 Hash ${txHash} acoplado al lote ${id}`);
         setProductListDB((prev) => prev.map(p => {
             if (String(p.blockchainId) === String(id)) {
                 return { ...p, pendingTxHash: txHash }

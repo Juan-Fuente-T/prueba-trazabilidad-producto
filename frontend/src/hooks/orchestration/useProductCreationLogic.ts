@@ -36,7 +36,7 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
                     const realIdFromContract = Number(result.data);
 
                     if (!realIdFromContract) {
-                        throw new Error("❌ Error crítico: No se pudo leer el ID del producto de la Blockchain. Abortando guardado.");
+                        throw new Error("❌ Error crítico: No se pudo leer el ID del lote de la Blockchain. Abortando guardado.");
                     }
 
                     // TODO: OPTIMIZACIÓN DEL ALMACENAMIENTO
@@ -68,7 +68,7 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
                     }
                     await saveToDB(payload)
                     // No hace falta toast aquí si ya lo ve el usuario en la lista con el check verde
-                    // showToast("Producto confirmado y guardado", "success")
+                    // showToast("Lote confirmado y guardado", "success")
                 } catch (e) {
                     console.error("Error crítico orquestación:", e)
                     showToast("Error guardando en base de datos", "error")
@@ -106,7 +106,7 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
 
             // Cierra modal o avisa al usuario (Depende de decisión de UX)
             if (onSuccess) onSuccess();
-            showToast("Creando producto...", "info")
+            showToast("Creando lote...", "info")
 
             const productHash = calculateHash(formData.name, formData.description)
             // Guarda el hash para evitar posibles duplicados

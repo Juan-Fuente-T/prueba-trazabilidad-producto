@@ -3,7 +3,7 @@ export const getEventColor = (type: string) => {
         case 'CREATED': return 'bg-emerald-500'
         case 'TRANSFERRED': return 'bg-blue-500'
         case 'DELETED': return 'bg-rose-500'
-        default: return 'bg-gray-400'
+        default: return 'bg-acero-400'
     }
 }
 
@@ -12,7 +12,7 @@ export const getEventBadgeColor = (type: string) => {
         case 'CREATED': return 'bg-emerald-100 text-emerald-800'
         case 'TRANSFERRED': return 'bg-blue-100 text-blue-800'
         case 'DELETED': return 'bg-rose-100 text-rose-800'
-        default: return 'bg-gray-100 text-gray-800'
+        default: return 'bg-acero-100 text-acero-800'
     }
 }
 

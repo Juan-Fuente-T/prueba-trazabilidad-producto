@@ -24,11 +24,11 @@ export const saveProductToDB = async (payload: ProductPayload): Promise<ProductD
     const productResponse = await txProduct.json();
 
     if (!txProduct.ok || (productResponse.success === false)) {
-        throw new Error(productResponse.message || "Error al guardar el producto en BD");
+        throw new Error(productResponse.message || "Error al guardar el lote en BD");
     }
     return productResponse.data || productResponse
 } catch (error) {
-        console.error("❌ Error guardando producto:", error);
+        console.error("❌ Error guardando lote:", error);
         // Importante relanzar el error, si no parecerá que se guardó bien.
         throw error;
     }
@@ -63,11 +63,11 @@ export const deleteProductToDB = async (payload: DeleteProductPayload): Promise<
     const deleteResponse = await txDelete.json();
 
     if (!txDelete.ok || (deleteResponse.success === false)) {
-        throw new Error(deleteResponse.message || "Error al eliminar el producto");
+        throw new Error(deleteResponse.message || "Error al eliminar el lote");
     }
     return deleteResponse.data || deleteResponse
 } catch (error) {
-        console.error("❌ Error eliminando el producto:", error);
+        console.error("❌ Error eliminando el lote:", error);
         // Importante relanzar el error, si no parecerá que se guardó bien.
         throw error;
     }
@@ -88,7 +88,7 @@ export const getProductFromDB = async (productId: string) => {
         const json = await response.json()
         return json.data || json
     } catch (error) {
-        console.error("❌ Error de red al buscar producto:", error);
+        console.error("❌ Error de red al buscar lote:", error);
         return null;
     }
 }
@@ -107,7 +107,7 @@ export const getProductListFromDB = async () => {
         return Array.isArray(json.data) ? json.data : [];
 
     } catch (error) {
-        console.error("❌ Error de red obteniendo productos:", error)
+        console.error("❌ Error de red obteniendo lotes:", error)
         return [] // En caso de pánico, devuelve lista vacía
     }
 }

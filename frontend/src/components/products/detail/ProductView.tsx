@@ -46,14 +46,14 @@ export default function ProductView({ productId}: Props) {
 
     if (!productDB) {
         return (
-            <div className="min-h-screen bg-stone-50">
+            <div className="min-h-screen bg-acero-50">
                 <div className="container mx-auto px-4 py-8">
                     <ProductNavigation currentId={numericId} />
                     <div className="flex flex-col items-center justify-center text-center">
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 max-w-md w-full">
-                            <h2 className="text-2xl font-bold text-stone-800 mb-2">Producto no encontrado</h2>
-                            <p className="text-stone-500 mb-6">
-                                El producto <strong>#{numericId}</strong> no existe o no ha sido registrado aún.
+                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-acero-200 max-w-md w-full">
+                            <h2 className="text-2xl font-bold text-acero-800 mb-2">Lote no encontrado</h2>
+                            <p className="text-acero-500 mb-6">
+                                El lote <strong>#{numericId}</strong> no existe o no ha sido registrado aún.
                             </p>
                             <Link href="/" className="text-emerald-600 font-medium border border-emerald-600 rounded-md px-2 py-1.5 hover:underline ">
                                 Ir al listado principal
@@ -66,7 +66,7 @@ export default function ProductView({ productId}: Props) {
     }
 
     return (
-        <main className="min-h-screen bg-stone-50">
+        <main className="min-h-screen bg-acero-50">
             <div className="container mx-auto px-4 py-8">
                 <ProductNavigation currentId={numericId} />
                 <ProductDetailCard productDB={productDB} eventListDB={eventListDB} onDataUpdate={handleUpdateData}/>
