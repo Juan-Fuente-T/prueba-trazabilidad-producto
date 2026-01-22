@@ -21,7 +21,11 @@ export function useGetEventListFromDB(productId: string) {
         setError(null)
         try {
             const data = await getEventListFromDB(productId)
-            setEventListDB(data || [])
+            // ORDENA SIEMPRE (ASCENDENTE: El más nuevo último)
+            const sortedData = data ? [...data].sort((a, b) => {
+                return Number(a.timestamp) - Number(b.timestamp)
+            }) : []
+            setEventListDB(sortedData || [])
 
             if (!data) {
                 setError("Lista de productos no encontrado en BD")

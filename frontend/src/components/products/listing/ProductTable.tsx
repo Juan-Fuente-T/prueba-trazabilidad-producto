@@ -1,10 +1,10 @@
 
-import { ProductDB } from '@/types/product'
+import { ProductUI } from '@/types/product'
 import ProductTableRow from './ProductTableRow'
 import ProductMobileCard from '../detail/ProductMobileCard'
 
 interface ProductGridProps {
-    products: ProductDB[];
+    products: ProductUI[];
 }
 
 export default function ProductGrid({ products }: ProductGridProps) {

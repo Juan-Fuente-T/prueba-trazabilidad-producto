@@ -6,13 +6,14 @@ import RegisterProductModal from '@/components/products/modals/RegisterProductMo
 import GenericActionController from '@/components/ui/GenericActionController'
 import { useProductDashboardLogic } from '@/hooks/orchestration/useProductDashboardLogic'
 import { useAccount } from 'wagmi'
+import { ProductUI } from '@/types/product'
 
 export default function Home() {
   const { isConnected } = useAccount()
   const {
     productListDB,
     optimisticActions,
-    refecth,
+    // refecth,
     isLoading,
     error
   } = useProductDashboardLogic()
@@ -22,11 +23,17 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         {/* CABECERA*/}
         <div className="flex  flex-col justify-between items-end">
-          <h1 className="text-lg sm:text-2xl font-bold mb-12 mt-8 text-center w-full">
-            Prueba de concepto para trazabilidad de producto en Blockchain (Java / Spring / Next / Typescript / Solidity)
-          </h1>
+          <div className="w-full border-b border-stone-200 pb-4 mt-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 tracking-tight">
+              Sistema de Trazabilidad de Lotes
+            </h1>
+            <p className="text-stone-500 mt-1 text-sm">
+              Gestión certificada de inventario y cadena de custodia.
+            </p>
+          </div>
+
           {/* 2. BARRA SUPERIOR: BOTÓN DE CREAR */}
-          <div className="flex justify-between items-center mx-auto mb-8 sm:mb-12 w-full">
+          <div className="flex justify-between items-center mx-auto mt-4 mb-8 sm:mb-12 w-full">
             <div>
               <h1 className="text-3xl font-bold text-stone-800">Inventario</h1>
               <p className="text-stone-500">Panel de Control</p>
@@ -39,15 +46,20 @@ export default function Home() {
                   ModalComponent={RegisterProductModal}
                   disabled={!isConnected}
                   preFilledId="" // Relleno para cumplir con la interfaz
-                  modalProps={{
-                    onOptimisticCreate: optimisticActions.create,
-                    onRollback: optimisticActions.rollback
+                  onSuccess={(data) => {
+                    if (data && 'product' in data && 'txHash' in data) {
+                      const payload = data as { product: ProductUI; txHash: string };
+                      if (optimisticActions.attachHash) {
+                        optimisticActions.attachHash(payload.product.blockchainId, payload.txHash);
+                      }
+                    }
                   }}
-                  onSuccess={() => {
-                    // espera 2 segundos a que el Backend indexe y RECARGA la lista.
-                    setTimeout(() => {
-                      refecth()
-                    }, 2000)
+                  modalProps={{
+                    // FASE OPTIMISTA: Pinta de inmediato
+                    onOptimisticCreate: (product: ProductUI) => {
+                      optimisticActions.create(product);
+                    },
+                    onRollback: optimisticActions.rollback
                   }}
                 />
               ) : (

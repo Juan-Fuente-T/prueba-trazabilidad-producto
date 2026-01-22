@@ -33,9 +33,7 @@ export default function ProductAnalytics({ activeProductsQuantity, events }: Ana
         { name: 'Resto Producción', value: safeTotal - 1 }
     ]
     // DATOS PARA EL TIMELINE: Tiempo entre fases, diferencias de tiempo entre eventos consecutivos
-    //Ordena Cronológicamente (Del más viejo al más nuevo)
-    const sortedEvents = [...events].sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
-    const timelineData: TimelineData[] = sortedEvents.map((event, index, array) => {
+    const timelineData: TimelineData[] = events.map((event, index, array) => {
         if (index === 0) return null // El primer evento (creación) no tiene "duración previa"
 
         const prevEvent = array[index - 1]

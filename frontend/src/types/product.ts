@@ -40,4 +40,5 @@ export interface DeleteProductPayload {
 export interface ProductUI extends ProductDB {
     isVerified?: boolean;
     isOptimistic?: boolean;
+    pendingTxHash?: string;
 }

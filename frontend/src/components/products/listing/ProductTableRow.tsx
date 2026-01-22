@@ -1,13 +1,17 @@
-import { ProductDB } from '@/types/product'
+import { ProductUI } from '@/types/product'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getActorInfo } from '@/utils/roleUtils'
+import { getSyncBadgeStyles } from '@/utils/eventUiUtils'
 
-export default function ProductTableRow({ product }: { product: ProductDB }) {
+export default function ProductTableRow({ product }: { product: ProductUI }) {
     const [showImage, setShowImage] = useState(false);
     const router = useRouter()
     const info = getActorInfo(product.currentOwner);
+
+    const isPending = product.isVerified === false || !!product.pendingTxHash;
+    const badgeStyles = getSyncBadgeStyles(isPending);
 
     // Función para navegar a detalle de lote
     const handleRowClick = (e: React.MouseEvent) => {
@@ -26,7 +30,7 @@ export default function ProductTableRow({ product }: { product: ProductDB }) {
         <>
             <tr
                 onClick={handleRowClick}
-                className="hover:bg-acero-50 transition-colors group border-b border-acero-100 last:border-0 cursor-pointer"
+                className="hover:bg-acero-50 transition-colors group border-b border-acero-300 last:border-0 cursor-pointer"
             >
                 {/* 1. REF / IMAGEN */}
                 <td className="px-4 py-3 align-middle">
@@ -77,7 +81,7 @@ export default function ProductTableRow({ product }: { product: ProductDB }) {
                 </td>
 
                 {/* 5. ESTADO (Activo / Inactivo) */}
-                <td className="px-4 py-3 align-middle text-center">
+                <td className="px-4 py-3 align-middle text-center gap-2 flex items-center">
                     {product.active ? (
                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${info.color}`}>
                             {info.status}
@@ -87,6 +91,17 @@ export default function ProductTableRow({ product }: { product: ProductDB }) {
                             ✖ Finalizado / Borrado
                         </span>
                     )}
+                    {/* Badge de Sincronización */}
+                        {isPending && (
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider animate-pulse ${badgeStyles}`}>
+                            {/* <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200"> */}
+                                <svg className="animate-spin h-2.5 w-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Verificando
+                            </span>
+                        )}
                 </td>
 
                 {/* 6. ACCIÓN */}

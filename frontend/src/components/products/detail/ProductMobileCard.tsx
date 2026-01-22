@@ -1,12 +1,16 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { getActorInfo } from '@/utils/roleUtils'
-import { ProductDB } from '@/types/product'
+import { ProductUI } from '@/types/product'
 // import Image from "next/image"
+import { getSyncBadgeStyles } from '@/utils/eventUiUtils'
 
-export default function ProductMobileCard({ product }: { product: ProductDB }) {
+export default function ProductMobileCard({ product }: { product: ProductUI}) {
     const info = getActorInfo(product.currentOwner);
     const [showImage, setShowImage] = useState(false);
+
+    const isPending = product.isVerified === false || !!product.pendingTxHash;
+    const badgeStyles = getSyncBadgeStyles(isPending);
 
     return (
         <div className="w-full bg-white p-3 rounded-lg border border-acero-200 shadow-sm flex flex-col gap-2 mb-3">
@@ -20,7 +24,18 @@ export default function ProductMobileCard({ product }: { product: ProductDB }) {
                     <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${info.color}`}>
                         {info.status}
                     </span>
+                    {/* Badge de Sincronización en la cabecera */}
+                    {isPending && (
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${badgeStyles}`}>
+                            <svg className="animate-spin h-2.5 w-2.5" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Sync
+                        </span>
+                    )}
                 </div>
+
                 {/* Botón Acción */}
                 <Link
                     href={`/products/${product.blockchainId}`}

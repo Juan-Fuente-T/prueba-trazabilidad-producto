@@ -28,7 +28,6 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
 
     const { updateProductId } = useProductMetrics()
 
-
     useEffect(() => {
         if (isSuccess && txHash && !isSavingDB) {
             const saveInBackend = async () => {
@@ -79,13 +78,6 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
         }
     }, [isSuccess, txHash])
 
-    const resetForm = () => {
-        setFormData({ name: '', description: '', quantity: '' })
-        setImageFile(null)
-        productHashRef.current = null;
-        resetDBStatus()
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         // Genera un ID temporal único
@@ -120,7 +112,8 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
             // Guarda el hash para evitar posibles duplicados
             productHashRef.current = productHash
             // LLama al guardado en Blockchain
-            await registerProduct(BigInt(formData.quantity), productHash)
+            const tx = await registerProduct(BigInt(formData.quantity), productHash)
+            console.log("TX hash de CREACION", tx)
 
             showToast("Transacción enviada. Esperando confirmación...", "info");
         } catch (error) {
@@ -132,31 +125,38 @@ export const useProductCreationLogic = ({ onOptimisticCreate, onRollback, onSucc
         }
     }
 
-        const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            const { name, value } = e.target
-            // Copia todo lo anterior y sobreescribe solo ese campo
-            setFormData(prev => ({ ...prev, [name]: value }))
-        }
-        const isGlobalLoading = isPending || isConfirming || isSavingDB
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target
+        // Copia todo lo anterior y sobreescribe solo ese campo
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+    const isGlobalLoading = isPending || isConfirming || isSavingDB
 
-        return {
-            formData,
-            imageFile,
-            txHash,
-            setImageFile,
-            handleChange,
-            handleSubmit,
-            resetForm,
-            status: {
-                isPending,
-                isConfirming,
-                isSuccess,
-                isSavingDB,
-                isGlobalLoading
-            },
-            errors: {
-                blockchainError,
-                errorDB
-            }
+    const resetForm = () => {
+        setFormData({ name: '', description: '', quantity: '' })
+        setImageFile(null)
+        productHashRef.current = null;
+        resetDBStatus()
+    }
+
+    return {
+        formData,
+        imageFile,
+        txHash,
+        setImageFile,
+        handleChange,
+        handleSubmit,
+        resetForm,
+        status: {
+            isPending,
+            isConfirming,
+            isSuccess,
+            isSavingDB,
+            isGlobalLoading
+        },
+        errors: {
+            blockchainError,
+            errorDB
         }
+    }
 }

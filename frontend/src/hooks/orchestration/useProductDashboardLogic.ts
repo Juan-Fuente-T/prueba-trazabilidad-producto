@@ -1,5 +1,6 @@
 import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB'
 import { useProductEventsVerifier } from '@/hooks/blockchain/useProductEventsVerifier'
+import { usePendingHashVerifier } from '@/hooks/orchestration/usePendingHashVerifier'
 import { ProductUI } from '@/types/product'
 import { Event } from '@/types/events'
 
@@ -7,12 +8,18 @@ export function useProductDashboardLogic() {
     const { productListDB, setProductListDB, isLoading, error, refecth } = useGetProductListFromDB()
 
     // Confirma los datos actuales desde el evento en blockchain
-    const handleBlockchainEvent = (data: Partial<Event>) => {
-
+    const handleBlockchainEvent = (data: Partial<Event> & { txHash: string }) => {
         setProductListDB((prevList: ProductUI[]) => {
             return prevList.map(product => {
                 // Busca si el evento corresponde al producto, asegurando el match con Number
                 if (Number(product.blockchainId) === Number(data.productBlockchainId)) {
+
+                    if (product.pendingTxHash) {
+                        // ...y el hash del evento NO coincide, no hacemos nada (es un evento viejo o de otro)
+                        if (product.pendingTxHash !== data.txHash) {
+                            return product;
+                        }
+                    }
 
                     if ((data.type === 'TRANSFERRED' || data.type === 'CREATED') && data.toAddress) {
 
@@ -20,14 +27,16 @@ export function useProductDashboardLogic() {
                         if (product.currentOwner?.toLowerCase() === data.toAddress.toLowerCase()) {
                             return {
                                 ...product,
-                                isVerified: true
+                                isVerified: true,
+                                pendingTxHash: undefined
                             }
                         }
                         // Si no coincide, actualiza a la fuerza
                         return {
                             ...product,
                             currentOwner: data.toAddress,
-                            isVerified: true
+                            isVerified: true,
+                            pendingTxHash: undefined
                         }
                     }
 
@@ -36,7 +45,8 @@ export function useProductDashboardLogic() {
                             ...product,
                             currentOwner: product.currentOwner,
                             active: false,
-                            isVerified: true
+                            isVerified: true,
+                            pendingTxHash: undefined
                         }
                     }
                 }
@@ -44,11 +54,60 @@ export function useProductDashboardLogic() {
             })
         })
     }
-    // Activa el escuchador de eventos
+    // ---------------------------------------------------------
+    // ESCUCHADOR DE EVENTOS (FRONTEND)
+    // ---------------------------------------------------------
+    // NOTA: Este hook utiliza internamente 'wagmi' (useWatchContractEvent).
+    // Wagmi implementa su propio 'useEffect' que se monta automáticamente
+    // al invocar la función. Mantiene una suscripción WebSocket/RPC activa
+    // mientras este componente permanezca montado en el árbol de React.
+    // No requiere un useEffect adicional ni un botón de arranque.
     useProductEventsVerifier(
         () => { }, // Callback visual vacío
         handleBlockchainEvent // Pasa la lógica de actualización
     )
+
+    // -----------------------------------------------------------------------
+    //FILTRADO: Obtiene TODOS los productos que están esperando vefificación
+    // -----------------------------------------------------------------------
+    const pendingProducts = productListDB
+        .filter(p => p.pendingTxHash && p.blockchainId)
+        .map(p => ({
+            id: p.blockchainId,
+            hash: p.pendingTxHash! // El ! asegura que existe porque filtramos antes
+        }));
+
+    // -----------------------------------------------------------------------
+    // ACTIVACIÓN DEL ESCUCHADOR PARA VERIFICACIONES PENDIENTES
+    // -----------------------------------------------------------------------
+    usePendingHashVerifier({
+        pendingItems: pendingProducts,
+        onItemVerified: (verifiedId) => {
+            setProductListDB(prev => prev.map(p => {
+                if (String(p.blockchainId) === String(verifiedId)) {
+                    return {
+                        ...p,
+                        isVerified: true,
+                        pendingTxHash: undefined
+                    }
+                }
+                return p
+            }))
+        }
+    })
+
+    // -----------------------------------------------------------------------
+    // ACTUALIZACIÓN DE HASH PENDIENTE
+    // -----------------------------------------------------------------------
+    const attachPendingHash = (id: string | number, txHash: string) => {
+        console.log(`🔌 Hash ${txHash} acoplado al producto ${id}`);
+        setProductListDB((prev) => prev.map(p => {
+            if (String(p.blockchainId) === String(id)) {
+                return { ...p, pendingTxHash: txHash }
+            }
+            return p
+        }))
+    }
 
     // Lógica Optimista: Datos guardados antes de la confirmación desde blockchain
     const optimisticTransfer = (data: { id: string | number, newOwner: string }) => {
@@ -57,7 +116,8 @@ export function useProductDashboardLogic() {
                 return {
                     ...p,
                     currentOwner: data.newOwner,
-                    isVerified: false
+                    isVerified: false,
+                    // pendingTxHash: data.txHash
                 }
             }
             return p
@@ -70,7 +130,8 @@ export function useProductDashboardLogic() {
                 return {
                     ...p,
                     active: false,
-                    isVerified: false
+                    isVerified: false,
+                    // pendingTxHash: txHash
                 }
             }
             return p
@@ -81,7 +142,8 @@ export function useProductDashboardLogic() {
         // Al crear, entra como NO verificado por defecto
         const visualProduct: ProductUI = {
             ...newProduct,
-            isVerified: false
+            isVerified: false,
+            // pendingTxHash: txHash
         }
         setProductListDB((prevList) => [visualProduct, ...prevList])
     }
@@ -106,7 +168,8 @@ export function useProductDashboardLogic() {
             create: optimisticCreate,
             transfer: optimisticTransfer,
             delete: optimisticDelete,
-            rollback: optimisticRollback
+            rollback: optimisticRollback,
+            attachHash: attachPendingHash
         }
     }
 }

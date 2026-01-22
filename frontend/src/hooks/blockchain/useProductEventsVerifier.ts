@@ -6,7 +6,7 @@ import { Event, TypeEvent } from '@/types/events'
 
 type EventCallback = (message: string, type: TypeEvent) => void
 // Callback para pasar los datos crudos y actualizar listas
-type DataCallback = (eventData: Partial<Event>) => void
+type DataCallback = (eventData: Partial<Event> & { txHash: string }) => void
 
 export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: DataCallback) {  // Escucha ProductRegistered
   useWatchContractEvent({
@@ -16,7 +16,10 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
     onLogs(logs) {
       logs.forEach((log) => {
         const { productId, owner } = log.args
+        const txHash = log.transactionHash
+
         onEvent(`Producto #${productId} registrado por ${owner?.slice(0, 6)}...`, 'CREATED')
+
         // Pasa datos estructurados por si el padre quiere actualizar listas
         if (onNewData && productId !== undefined && owner) {
           onNewData({
@@ -24,7 +27,8 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
             productBlockchainId: Number(productId),
             toAddress: owner,
             timestamp: Date.now(),
-            isVerified: true
+            isVerified: true,
+            txHash: txHash
           })
         }
       })
@@ -39,7 +43,10 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
     onLogs(logs) {
       logs.forEach((log) => {
         const { productId, from, to } = log.args
+        const txHash = log.transactionHash
+
         onEvent(`Producto #${productId} transferido de ${from?.slice(0, 6)}... a ${to?.slice(0, 6)}...`, 'TRANSFERRED')
+
         // Pasa datos estructurados por si el padre quiere actualizar listas
         if (onNewData && productId !== undefined && from && to) {
           onNewData({
@@ -48,7 +55,8 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
             fromAddress: from,
             toAddress: to,
             timestamp: Date.now(),
-            isVerified: true
+            isVerified: true,
+            txHash: txHash
           })
         }
       })
@@ -63,14 +71,18 @@ export function useProductEventsVerifier(onEvent: EventCallback, onNewData?: Dat
     onLogs(logs) {
       logs.forEach((log) => {
         const { productId } = log.args
+        const txHash = log.transactionHash
+
         onEvent(`Producto #${productId} eliminado`, 'DELETED')
+
         // Pasa datos estructurados por si el padre quiere actualizar listas
         if (onNewData && productId !== undefined) {
           onNewData({
             type: 'DELETED',
             productBlockchainId: Number(productId),
             timestamp: Date.now(),
-            isVerified: true
+            isVerified: true,
+            txHash: txHash
           })
         }
       })

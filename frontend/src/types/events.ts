@@ -12,3 +12,8 @@ export interface Event {
 }
 
 export type TypeEvent = 'CREATED' | 'TRANSFERRED' | 'DELETED'
+
+export type PendingItem = {
+    id: string | number;
+    hash: string;
+}

@@ -34,3 +34,12 @@ export const getShortDescription = (type: string) => {
         default: return 'Evento'
     }
 }
+
+// Badge específico para el estado de sincronización Blockchain
+export const getSyncBadgeStyles = (isPending: boolean) => {
+    if (isPending) {
+        return "bg-amber-50 text-amber-700 border-amber-200 ring-1 ring-amber-100";
+    }
+    // Si está verificado, devuelve estilos neutros/invisibles o un verde muy sutil
+    return "bg-transparent text-emerald-600 border-transparent";
+}

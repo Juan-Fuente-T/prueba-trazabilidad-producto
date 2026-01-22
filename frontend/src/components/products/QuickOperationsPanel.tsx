@@ -5,7 +5,7 @@ import TransferProductModal from '@/components/products/modals/TransferProductMo
 import DeleteProductModal from '@/components/products/modals/DeleteProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
 import { useAccount } from 'wagmi'
-import { ProductUI} from '@/types/product'
+import { ProductUI } from '@/types/product'
 
 interface QuickOperationsPanelProps {
     actions?: {
@@ -13,6 +13,7 @@ interface QuickOperationsPanelProps {
         transfer: (data: { id: string | number, newOwner: string }) => void;
         delete: (id: string | number) => void;
         rollback: (id: string | number, type: 'create' | 'transfer' | 'delete') => void;
+        attachHash: (id: string | number, txHash: string) => void;
     };
 }
 
@@ -56,9 +57,6 @@ export default function QuickOperationsPanel({ actions }: QuickOperationsPanelPr
                         ModalComponent={TransferProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
-                        // AL TERMINAR: Limpia el input
-                        onSuccess={handleModalClose}
-                        // LÓGICA OPTIMISTA de asignación
                         modalProps={{
                             onOptimisticUpdate: (prod) => {
                                 if (actions?.transfer && prod.blockchainId && prod.currentOwner) {
@@ -70,6 +68,15 @@ export default function QuickOperationsPanel({ actions }: QuickOperationsPanelPr
                             },
                             onRollback: (id) => actions?.rollback(id, 'transfer')
                         }}
+
+                        // FASE CONFIRMACIÓN (ACOPLAR HASH)
+                        // Se ejecuta cuando la Wallet devuelve el Hash
+                        onSuccess={(data) => {
+                            if (data && data.txHash && actions?.attachHash) {
+                                actions.attachHash(targetId, data.txHash)
+                            }
+                            handleModalClose()
+                        }}
                     />
                     <GenericActionController
                         buttonText="🗑️ Baja"
@@ -77,14 +84,19 @@ export default function QuickOperationsPanel({ actions }: QuickOperationsPanelPr
                         ModalComponent={DeleteProductModal}
                         preFilledId={targetId}
                         disabled={!targetId || !isConnected}
-                        // AL TERMINAR: Limpia el input
-                        onSuccess={handleModalClose}
-                        // LÓGICA OPTIMISTA de borrado
                         modalProps={{
                             onOptimisticDelete: (id) => {
                                 if (actions?.delete) actions.delete(id)
                             },
                             onRollback: (id) => actions?.rollback(id, 'delete')
+                        }}
+
+                        // FASE CONFIRMACIÓN
+                        onSuccess={(data) => {
+                            if (data && data.txHash && actions?.attachHash) {
+                                actions.attachHash(targetId, data.txHash)
+                            }
+                            handleModalClose()
                         }}
                     />
                     {!isConnected &&
