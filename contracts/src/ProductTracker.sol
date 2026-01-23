@@ -8,8 +8,10 @@ pragma solidity ^0.8.28;
 contract ProductTracker {
     uint256 public productId = 1; // ID unico, inicia en 1 para evitar errores con el 0
     uint256 public activeProducts; // Cantidad total de productos activos
+    uint256 public adminCount; // Contador de admins, para seguridad de no borrar todos los admin
 
     mapping(uint256 => Product) public products; //Producto asociado a su ID
+    mapping(address => bool) public admins; // Conjunto de administradores
 
     /// @notice Product data structure
     /// @dev Uses timestamp for lifecycle tracking and exists flag for soft deletion
@@ -24,20 +26,70 @@ contract ProductTracker {
     event ProductRegistered(uint256 indexed productId, address indexed owner);
     event ProductTransferred(uint256 indexed productId, address from, address to);
     event ProductDeleted(uint256 indexed productId, address indexed owner);
+    event AdminStatusChanged(address indexed admin, bool isEnabled);
 
-    error NotOwner();
+    error NotOwnerOrAdmin();
+    error NotAdmin();
+    error NotValidAddress();
     error ProductExists();
     error ProductNotExists();
     error InvalidOwner();
     error InvalidQuantity();
     error CannotTransferToContract();
+    error CannotRemoveLastAdmin();
 
-    modifier onlyOwner(uint256 _productId) {
-        if (msg.sender != products[_productId].currentOwner) {
-            revert NotOwner();
+    // --- CONSTRUCTOR ---
+    constructor() {
+        admins[msg.sender] = true;
+        adminCount = 1;
+        emit AdminStatusChanged(msg.sender, true);
+    }
+    // --- MODIFIERS ---
+    modifier onlyAdmin() {
+        if (admins[msg.sender] != true) {
+            revert NotAdmin();
         }
         _;
     }
+
+    // El SUPER MODIFIER: Entras si eres el dueño del producto O si eres Admin
+    modifier onlyOwnerOrAdmin(uint256 _productId) {
+        address currentOwner = products[_productId].currentOwner;
+        if (msg.sender != currentOwner && !admins[msg.sender]) {
+            revert NotOwnerOrAdmin();
+        }
+        _;
+    }
+
+    // --- FUNCIONES DE ADMINISTRACIÓN ---
+
+    /// @notice Sets the admin status for a specific address
+    /// @param _targetAddress The address to set the admin status for
+    /// @param _status True to enable admin status, false to disable
+    /// _status = true (Añadir), _status = false (Borrar)
+    function setAdminStatus(address _targetAddress, bool _status) public onlyAdmin {
+        if (_targetAddress == address(0)) {
+            revert NotValidAddress();
+        }
+        if (admins[_targetAddress] == _status) return;
+
+        if (_status == true) {
+            admins[_targetAddress] = true;
+            adminCount++;
+        } else {
+            // Solo permite borrar si queda más de 1 admin en el sistema.
+            if (adminCount <= 1) {
+                revert CannotRemoveLastAdmin();
+            }
+            admins[_targetAddress] = false;
+            adminCount--;
+        }
+        admins[_targetAddress] = _status;
+        emit AdminStatusChanged(_targetAddress, _status);
+    }
+
+    // --- FUNCIONES DE NEGOCIO ---
+
     /// @notice Registers a new product in the system
     /// @param _quantity The quantity of units for this product
     /// @param _hash The keccak256 hash characterizing the product
@@ -69,7 +121,7 @@ contract ProductTracker {
     /// @notice Soft deletes a product (sets exists to false)
     /// @dev Only the current owner can delete their product
     /// @param _id The ID of the product to delete
-    function deleteProduct(uint256 _id) public onlyOwner(_id) {
+    function deleteProduct(uint256 _id) public onlyOwnerOrAdmin(_id) {
         //Checks
         if (!products[_id].exists) revert ProductNotExists(); //Los errores personalizados son mas eficientes en gas
 
@@ -84,7 +136,7 @@ contract ProductTracker {
     /// @notice Transfers product ownership to a new address
     /// @dev Cannot transfer to zero address, self, or contract addresses
     /// @param _id The ID of the product to transfer
-    function transferProduct(uint256 _id, address _newOwner) public onlyOwner(_id) {
+    function transferProduct(uint256 _id, address _newOwner) public onlyOwnerOrAdmin(_id) {
         if (_newOwner == msg.sender || _newOwner == address(0)) revert InvalidOwner();
         if (!products[_id].exists) revert ProductNotExists();
         if (_newOwner.code.length > 0) revert CannotTransferToContract();
