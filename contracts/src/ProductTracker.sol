@@ -75,6 +75,7 @@ contract ProductTracker {
 
         //Effects
         products[_id].exists = false;
+        products[_id].currentOwner = address(0);
         activeProducts--; // Se elimina un producto de la lista de activos
 
         //Interactions

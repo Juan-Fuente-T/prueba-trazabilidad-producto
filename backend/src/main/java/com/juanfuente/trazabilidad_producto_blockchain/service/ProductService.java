@@ -2,16 +2,17 @@ package com.juanfuente.trazabilidad_producto_blockchain.service;
 
 import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.response.ProductResponse;
 import com.juanfuente.trazabilidad_producto_blockchain.model.Product;
-import com.juanfuente.trazabilidad_producto_blockchain.model.ProductEvent;
 import com.juanfuente.trazabilidad_producto_blockchain.model.EventType;
 import com.juanfuente.trazabilidad_producto_blockchain.repository.ProductRepository;
-import com.juanfuente.trazabilidad_producto_blockchain.repository.ProductEventRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.juanfuente.trazabilidad_producto_blockchain.config.BlockchainConstants.BURN_ADDRESS;
 
 @Service
 @RequiredArgsConstructor // Inyecta los repositorios automáticamente (Lombok)
@@ -104,10 +105,11 @@ public class ProductService {
 
         // 1. Actualiza estado (Soft Delete)
         product.setActive(false);
+        product.setCurrentOwner(BURN_ADDRESS);
         Product deletedProduct = productRepository.save(product);
 
         String oldOwner = product.getCurrentOwner();
-        productEventService.registerEvent(product, txHash, oldOwner, oldOwner, EventType.DELETED);
+        productEventService.registerEvent(product, txHash, oldOwner, BURN_ADDRESS, EventType.DELETED);
 
         return ProductResponse.fromEntity(deletedProduct);
     }
