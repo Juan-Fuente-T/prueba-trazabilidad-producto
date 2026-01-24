@@ -13,7 +13,7 @@ export default function Home() {
   const {
     productListDB,
     optimisticActions,
-    // refecth,
+    // refetch,
     isLoading,
     error
   } = useProductDashboardLogic()

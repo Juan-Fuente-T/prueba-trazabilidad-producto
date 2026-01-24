@@ -11,6 +11,7 @@ interface Props {
     product: ProductUI;
     onDataUpdate: (newOwner?: string, newEvent?: Event) => void;
 }
+const BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
 
@@ -26,9 +27,8 @@ export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
         );
         onDataUpdate(newOwner, optimisticEvent);
     };
-return (
-<div className="flex w-full gap-3 w-full lg:w-auto flex-row shrink-0 justify-center">
-        {/*}<div className="flex w-full gap-3 w-full md:w-auto md:flex-col shrink-0">*/}
+    return (
+        <div className="flex w-full gap-3 w-full lg:w-auto flex-row shrink-0 justify-center">
             {/* ASIGNAR */}
             <GenericActionController
                 buttonText="🔄 Asignar"
@@ -49,6 +49,13 @@ return (
                 buttonColor="bg-rose-500 hover:bg-rose-600 border-none"
                 ModalComponent={DeleteProductModal}
                 preFilledId={product.blockchainId.toString()}
+                modalProps={{
+                    onOptimisticDelete: () => {
+                        handleSuccess("0xTempHash", 'DELETED', BURN_ADDRESS);
+                    }
+                }}
+                // Cuando el modal confirma que ha firmado (onSuccess),recibe el hash REAL
+                // y lo sobreescribe al producto para después verificarlo.
                 onSuccess={(data) => {
                     const deleteData = data as DeleteSuccessData;
                     if (deleteData?.txHash) {
@@ -57,36 +64,5 @@ return (
                 }}
             />
         </div>
-    // return (
-    //     <>
-    //         <div className="flex w-full gap-3 w-full md:w-auto md:flex-col shrink-0">
-    //             <button
-    //                 onClick={() => setIsTransferOpen(true)}
-    //                 className="flex-1 md:max-w-[120px] bg-industrial hover:bg-industrial-dark text-white py-2 px-3 rounded text-xs font-bold shadow-sm transition-all"
-    //             >
-    //                 🔄 Asignar
-    //             </button>
-    //             <button
-    //                 onClick={() => setIsDeleteOpen(true)}
-    //                 className="flex-none bg-white border border-red-200 text-red-600 hover:bg-red-50 py-2 px-3 rounded text-xs font-bold transition-all"
-    //             >
-    //                 🗑️ Baja
-    //             </button>
-    //         </div>
-
-    //         {/* MODALES encapsulados aquí */}
-    //         <TransferProductModal
-    //             isOpen={isTransferOpen}
-    //             onClose={() => setIsTransferOpen(false)}
-    //             preFilledId={product.blockchainId.toString()}
-    //             onSuccess={(data) => handleSuccess(data, 'TRANSFERRED', data.newOwner)}
-    //         />
-    //         <DeleteProductModal
-    //             isOpen={isDeleteOpen}
-    //             onClose={() => setIsDeleteOpen(false)}
-    //             preFilledId={product.blockchainId.toString()}
-    //             onSuccess={(data) => handleSuccess(data, 'DELETED', product.currentOwner)}
-    //         />
-    //     </>
     );
 };

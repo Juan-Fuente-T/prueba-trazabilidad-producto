@@ -1,59 +1,94 @@
+import { useEffect } from 'react';
 import useGetProductListFromDB from '@/hooks/api/useGetProductListFromDB'
 import { useProductEventsVerifier } from '@/hooks/blockchain/useProductEventsVerifier'
 import { usePendingHashVerifier } from '@/hooks/orchestration/usePendingHashVerifier'
+import { useProductCreationStore } from '@/store/useProductCreationStore'
 import { ProductUI } from '@/types/product'
 import { Event } from '@/types/events'
 
 export function useProductDashboardLogic() {
-    const { productListDB, setProductListDB, isLoading, error, refecth } = useGetProductListFromDB()
+    const { productListDB, setProductListDB, isLoading, error, refetch } = useGetProductListFromDB()
+    const lastWorkerUpdate = useProductCreationStore(state => state.lastWorkerUpdate);
+    const removePendingVerification = useProductCreationStore(s => s.removePendingVerification);
+    const refreshTrigger = useProductCreationStore(state => state.refreshTrigger);
 
-    // Confirma los datos actuales desde el evento en blockchain
-    const handleBlockchainEvent = (data: Partial<Event> & { txHash: string }) => {
-        setProductListDB((prevList: ProductUI[]) => {
-            return prevList.map(product => {
-                // Busca si el evento corresponde al producto, asegurando el match con Number
-                if (Number(product.blockchainId) === Number(data.productBlockchainId)) {
-
-                    if (product.pendingTxHash) {
-                        // ...y el hash del evento NO coincide, no hacemos nada (es un evento viejo o de otro)
-                        if (product.pendingTxHash !== data.txHash) {
-                            return product;
-                        }
-                    }
-
-                    if ((data.type === 'TRANSFERRED' || data.type === 'CREATED') && data.toAddress) {
-
-                        // Si el dueño visual coincide con el del evento -> VERIFICADO
-                        if (product.currentOwner?.toLowerCase() === data.toAddress.toLowerCase()) {
-                            return {
-                                ...product,
-                                isVerified: true,
-                                pendingTxHash: undefined
-                            }
-                        }
-                        // Si no coincide, actualiza a la fuerza
-                        return {
-                            ...product,
-                            currentOwner: data.toAddress,
-                            isVerified: true,
-                            pendingTxHash: undefined
-                        }
-                    }
-
-                    if (data.type === 'DELETED') {
-                        return {
-                            ...product,
-                            currentOwner: product.currentOwner,
-                            active: false,
-                            isVerified: true,
-                            pendingTxHash: undefined
-                        }
-                    }
+    // -----------------------------------------------------------------------
+    // ACTUALIZACIÓN LOCAL UNIFICADA
+    // Actualizar el producto de la optimisc UI con los cambios de la blockchain
+    // -----------------------------------------------------------------------
+    useEffect(() => {
+        if (lastWorkerUpdate) {
+            setProductListDB((prevList) => prevList.map(product => {
+                // Comparamos IDs como String para seguridad (TempId suele ser string, ID real number)
+                if (String(product.blockchainId) === String(lastWorkerUpdate.lookupId)) {
+                    // Aplica los cambios que vengan. Si es Creación: Cambiará blockchainId, isVerified, y hash.
+                    // Si es Borrado: Cambiará active a false. Si es Transfer: Cambiará currentOwner.
+                    return {
+                        ...product,
+                        ...lastWorkerUpdate.changes
+                    };
                 }
-                return product
-            })
-        })
-    }
+                return product;
+            }));
+        }
+    }, [lastWorkerUpdate, setProductListDB]);
+
+
+    // -----------------------------------------------------------------------
+    // ESTRATEGIA DE FONDO (Refetch Global)
+    // Solo se usa si el trigger se activa
+    // -----------------------------------------------------------------------
+    useEffect(() => {
+        // Solo usar todo si NO es una creación inmediata (para no descolocar el scroll)
+        if (refreshTrigger > 0) {
+            // console.log("Trigger de fondo recibido. Actualizando datos...");
+            refetch();
+        }
+    }, [refreshTrigger, refetch]);
+
+       // -----------------------------------------------------------------------
+    // GESTOR DE EVENTOS
+    // Confirma los datos actuales desde el evento en blockchain
+    // -----------------------------------------------------------------------
+    const handleBlockchainEvent = (data: Partial<Event> & { txHash: string }) => {
+        setProductListDB((prevList) => {
+            return prevList.map(product => {
+                // Coincidencia por HASH (Crucial para productos recién creados con ID temporal)
+                const isMatchHash = product.pendingTxHash &&
+                    data.txHash &&
+                    product.pendingTxHash.toLowerCase() === data.txHash.toLowerCase();
+
+                // Coincidencia por ID (Para productos ya existentes: Transferir/Borrar)
+                const isMatchId = String(product.blockchainId) === String(data.productBlockchainId);
+
+                if (!isMatchHash && !isMatchId) {
+                    return product;
+                }
+
+                // SEGURIDAD EXTRA (De tu código antiguo):
+                // Si el producto está esperando un Hash concreto (pendingTxHash)
+                // pero el evento trae OTRO hash diferente (y coincidió solo por ID),
+                // significa que es un evento viejo o una colisión. Se ignora.
+                if (product.pendingTxHash && !isMatchHash && isMatchId) {
+                    return product;
+                }
+
+                if (isMatchHash || isMatchId) {
+                    return {
+                        ...product,
+                        isVerified: true,
+                        active: data.type === 'DELETED' ? false : true,
+                        currentOwner: data.toAddress || product.currentOwner,
+                        pendingTxHash: undefined,
+                        // Si el evento trae ID y había uno temp, actualiza (seguridad extra)
+                        blockchainId: data.productBlockchainId ? Number(data.productBlockchainId) : product.blockchainId
+                    };
+                }
+                return product;
+            });
+        });
+    };
+
     // ---------------------------------------------------------
     // ESCUCHADOR DE EVENTOS (FRONTEND)
     // ---------------------------------------------------------
@@ -61,7 +96,7 @@ export function useProductDashboardLogic() {
     // Wagmi implementa su propio 'useEffect' que se monta automáticamente
     // al invocar la función. Mantiene una suscripción WebSocket/RPC activa
     // mientras este componente permanezca montado en el árbol de React.
-    // No requiere un useEffect adicional ni un botón de arranque.
+    // No requiere useEffect adicional ni botón de arranque.
     useProductEventsVerifier(
         () => { }, // Callback visual vacío
         handleBlockchainEvent // Pasa la lógica de actualización
@@ -100,13 +135,14 @@ export function useProductDashboardLogic() {
     // ACTUALIZACIÓN DE HASH PENDIENTE
     // -----------------------------------------------------------------------
     const attachPendingHash = (id: string | number, txHash: string) => {
-        console.log(`🔌 Hash ${txHash} acoplado al lote ${id}`);
         setProductListDB((prev) => prev.map(p => {
             if (String(p.blockchainId) === String(id)) {
                 return { ...p, pendingTxHash: txHash }
             }
             return p
         }))
+        // Opcional: Avisa al store para quitar de la cola global
+        removePendingVerification(id);
     }
 
     // Lógica Optimista: Datos guardados antes de la confirmación desde blockchain
@@ -156,12 +192,21 @@ export function useProductDashboardLogic() {
             return;
         }
         // Si es TRANSFER o DELETE (ya existía en BD) Se pide a la BD los datos reales de nuevo.
-        refecth();
+        refetch();
+    }
+
+    const replaceTempId = (tempId: string, realId: number) => {
+        setProductListDB((prev) => prev.map(p => {
+            if (String(p.blockchainId) === String(tempId)) {
+                return { ...p, blockchainId: realId }
+            }
+            return p
+        }))
     }
 
     return {
         productListDB,
-        refecth,
+        refetch,
         isLoading,
         error,
         optimisticActions: {
@@ -169,7 +214,8 @@ export function useProductDashboardLogic() {
             transfer: optimisticTransfer,
             delete: optimisticDelete,
             rollback: optimisticRollback,
-            attachHash: attachPendingHash
+            attachHash: attachPendingHash,
+            replaceId: replaceTempId
         }
     }
 }

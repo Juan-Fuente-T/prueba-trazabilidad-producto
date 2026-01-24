@@ -42,18 +42,13 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
     }, [isOpen, preFilledId])
 
     useEffect(() => {
-        if (status.isSuccess && !status.isDeletingDB && !hasNotifiedRef.current) {
-            //  const timer = setTimeout(() => {
-            //hasNotifiedRef.current = true
-            //     onSuccess()
-            //     onClose()
-            // }, 2000)
-            // return () => clearTimeout(timer)
+        if (status.isSuccess && !hasNotifiedRef.current) {
             hasNotifiedRef.current = true
+            // Si el modal sigue abierto (fallo de optimist UI), esto asegura el cierre final.
             onSuccess({ txHash: txHash || "0xHashNoDisponible" })
         }
         // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
-    }, [status.isSuccess, status.isDeletingDB, onSuccess])
+    }, [status.isSuccess, onSuccess])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Delete Product">
@@ -93,20 +88,20 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
                         {(errors.deleteError || (errors.readError && !errors.readError.message.includes("reverted"))) && (
                             <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-200 break-words">
                                 {/* Error: {errors.deleteError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB} */}
-                                Error: {errors.readError?.message || errors.readErrorDB || errors.errorDB}
+                                Error: {errors.readError?.message || errors.readErrorDB }
                             </p>
                         )}
                     </div>
                 )}
 
                 {/* Botón borrado*/}
-                {!status.isSuccess && <button
+                <button
                     type="submit"
                     className="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
-                    disabled={!isOwner || !product || status.isPending || status.isConfirming || status.isDeletingDB}
+                    disabled={!isOwner || !product || status.isPending || status.isConfirming }
                 >
-                    {status.isPending || status.isConfirming || status.isDeletingDB ? 'Borrando en Blockchain...' : 'Confirmar Borrado'}
-                </button>}
+                    {status.isPending || status.isConfirming ? 'Solicitando Confirmación...' : 'Confirmar Borrado'}
+                </button>
             </form>
         </Modal>
     )

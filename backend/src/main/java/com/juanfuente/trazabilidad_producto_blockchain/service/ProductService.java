@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.juanfuente.trazabilidad_producto_blockchain.config.BlockchainConstants.BURN_ADDRESS;

@@ -11,13 +11,13 @@ import { ProductActionsControl } from './ProductActionsControl';
 import { useProductMetrics } from '@/hooks/blockchain/useProductMetrics';
 import { getRoleName } from '@/utils/roleUtils';
 
-interface ProductDetailProps {
+interface ProductDetailCardProps {
     productDB: ProductUI;
     eventListDB: Event[];
     onDataUpdate: (newOwner?: string, newEvent?: Event) => void;
 }
 
-export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate }: ProductDetailProps) {
+export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate }: ProductDetailCardProps) {
     const { address } = useAccount();
     const { activeProductsQuantity, updateActiveProductsQuantity } = useProductMetrics();
 

@@ -5,6 +5,8 @@ import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ToastProvider } from '@/context/ToastContext';
+import ProductCreationBackgroundManager from '@/components/products/logic/ProductCreationBackgroundManager'
+import GlobalVerificationManager from '@/components/products/logic/GlobalVerificationManager'
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -31,6 +33,10 @@ export default function RootLayout({
             <Header />
             {/* pt-16 compensa la altura del Header fijo */}
             <main className="flex-grow pt-16 w-full">
+              {/* VERIFICACIÓN: Lee cola -> Consulta Eventos -> Confirma -> Refresca */}
+              <GlobalVerificationManager/>
+              {/* GESTOR EN 2º PLANO: Mantiene vivo el guardado en BD aunque el usuario cierre el modal o cambie de página. */}
+              <ProductCreationBackgroundManager/>
               {children}
             </main>
             <Footer />

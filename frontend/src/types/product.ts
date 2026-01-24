@@ -42,3 +42,5 @@ export interface ProductUI extends ProductDB {
     isOptimistic?: boolean;
     pendingTxHash?: string;
 }
+
+export type ProductFormData = Pick<ProductDB, 'name' | 'description' | 'quantity'>;

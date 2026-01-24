@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
-// import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
 import { useDeleteProduct } from '@/hooks/blockchain/useDeleteProduct'
-import { useDeleteProductToDB } from '@/hooks/api/useDeleteProductToDB'
+import { useProductCreationStore } from '@/store/useProductCreationStore'
 import { useToast } from '@/context/ToastContext'
 
 interface UseProductDeleteLogicProps {
@@ -11,15 +10,14 @@ interface UseProductDeleteLogicProps {
     onRollback?: (id: string | number) => void;
     onSuccess?: () => void; // Para cerrar el modal
 }
-// export const useProductDeleteLogic = (onClose: () => void) => {
-// export const useProductDeleteLogic = () => {
+
 export const useProductDeleteLogic = ({
     onOptimisticDelete,
     onRollback,
     onSuccess
 }: UseProductDeleteLogicProps = {}) => {
+    const queueAction = useProductCreationStore(s => s.queueAction);
     const [productId, setProductId] = useState('')
-    // const router = useRouter()
     const { showToast } = useToast()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
@@ -31,63 +29,36 @@ export const useProductDeleteLogic = ({
     const { productDB, isLoading: loadingDB, error: readErrorDB } = useGetProductFromDB(idParaBuscarEnBD)
 
     const { deleteProduct, isPending, isConfirming, isSuccess, error: deleteError, hash: txHash } = useDeleteProduct()
-
-    const { deleteToDB, isDeletingDB, errorDB } = useDeleteProductToDB()
-
-    // --- SINCRONIZACIÓN SILENCIOSA CON BD ---
-    useEffect(() => {
-        if (isSuccess && txHash && !isDeletingDB) {
-            const syncDeleteToDB = async () => {
-                try {
-                    await deleteToDB({
-                        blockchainId: Number(productId),
-                        txHash: txHash,
-                        expectedProductHash: product?.characterizationHash || ""
-                    })
-
-                    // Si todo va bien:
-                    // router.refresh() // Refresca la lista de productos
-
-                    // Cierra el modal tras un pequeño delay
-                    // setTimeout(() => {
-                    //     setProductId('')
-                    //     onClose()
-                    // }, 2000)
-
-                } catch (e) {
-                    console.error("Falló la eliminación del lote", e)
-                    // El error se guarda en errorDB y se podría mostrar un toast aquí si se quisiera
-                }
-            }
-
-            syncDeleteToDB()
-        }
-    }, [isSuccess, txHash])
-
-    const handleSubmit = async (e: React.FormEvent) => {
+        const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!productId || !isOwner) return
+        const currentId = productId;
 
         try {
             // UI OPTIMISTA: Lo borra de la vista YA
             if (onOptimisticDelete) {
-                onOptimisticDelete(productId)
+                onOptimisticDelete(currentId)
             }
-            // UX: CERRAR MODAL Y AVISAR
-            // Cierra inmediatamente para que el usuario vea la lista actualizada
+            showToast("Solicitando firma...", "info");
+            // writeContractAsync devuelve el hash en milisegundos tras la firma.
+            const txDelete = await deleteProduct(BigInt(currentId))
+
+            queueAction('DELETED', {
+                id: Number(currentId),
+                txHash: txDelete,
+                expectedHash: product?.characterizationHash || ""
+            });
+
             if (onSuccess) onSuccess();
-            showToast("Solicitud de baja enviada a Blockchain...", "info");
 
-            await deleteProduct(BigInt(productId))
-
+            showToast("Baja firmada. Procesando...", "info");
         } catch (error) {
             console.error("Error al borrar:", error);
             showToast("Error al procesar la baja", "error");
-
-            // ROLLBACK (Si falla, que vuelva a aparecer)
+            // ROLLBACK (Si falla, vuelve a aparecer)
             if (onRollback) {
-                onRollback(productId)
+                onRollback(currentId)
             }
         }
     }
@@ -104,15 +75,13 @@ export const useProductDeleteLogic = ({
             isPending,
             isConfirming,
             isSuccess,
-            isDeletingDB,
             loadingDB,
             loadingBC
         },
         errors: {
             readError,
             deleteError,
-            readErrorDB,
-            errorDB
+            readErrorDB
         }
     }
 }

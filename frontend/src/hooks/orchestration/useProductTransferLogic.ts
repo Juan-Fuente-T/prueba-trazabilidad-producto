@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetProduct } from '@/hooks/blockchain/useGetProduct'
+import { useProductCreationStore } from '@/store/useProductCreationStore'
 import { useTransferProduct } from '@/hooks/blockchain/useTransferProduct'
-import { useTransferProductToDB } from '@/hooks/api/useTransferProductToDB'
 import { useToast } from '@/context/ToastContext'
 import { ProductUI } from '@/types/product'
 
@@ -12,11 +11,11 @@ interface UseProductTransferLogicProps {
     onRollback?: (tempId: string) => void;
     onSuccess?: () => void;
 }
-// export const useProductTransferLogic = (onClose: () => void) => {
+
 export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSuccess }: UseProductTransferLogicProps) => {
+    const queueAction = useProductCreationStore(s => s.queueAction);
     const [productId, setProductId] = useState('')
     const [newOwner, setNewOwner] = useState('')
-    const router = useRouter()
     const { showToast } = useToast()
 
     const { product, isOwner, isLoading: loadingBC, error: readError } = useGetProduct(
@@ -29,50 +28,13 @@ export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSucc
 
     const { transferProduct, isPending, isConfirming, isSuccess, error: writeError, hash: txHash } = useTransferProduct()
 
-    const { transferToDB, isTransferingDB, errorDB } = useTransferProductToDB()
-
-    useEffect(() => {
-        if (isSuccess && txHash && !isTransferingDB) {
-            const syncWithBackend = async () => {
-                try {
-                    await transferToDB({
-                        blockchainId: Number(productId),
-                        txHash: txHash,
-                        newOwnerAddress: newOwner,
-                        expectedProductHash: product?.characterizationHash || ""
-                    })
-
-                    // Si todo va bien:
-                    router.refresh() // Refresca la lista de productos
-
-                    // Cierra modal tras un pequeño delay??
-                    setTimeout(() => {
-                        setNewOwner('')
-                        // onClose()
-                    }, 2000)
-
-                } catch (e) {
-                    console.error("Falló la sincronización con BD", e)
-                }
-            }
-            syncWithBackend()
-        }
-    }, [isSuccess, txHash])
-
-    // const handleSubmit = (e: React.FormEvent) => {
-    //     e.preventDefault()
-
-    //     if (!productId || !newOwner) return
-    //     //Todo: validar que el id no sea de un producto ya borrado
-    //     transferProduct(BigInt(productId), newOwner as `0x${string}`)
-    // }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!productId || !newOwner) return
 
         try {
-            // 🔥 1. UI OPTIMISTA: CAMBIAMOS DUEÑO YA
+            // 🔥 UI OPTIMISTA: CAMBIA DUEÑO YA
             if (onOptimisticUpdate) {
                 onOptimisticUpdate({
                     blockchainId: productId,
@@ -81,13 +43,24 @@ export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSucc
                 })
             }
             if (onSuccess) onSuccess();
-            showToast("Transferencia enviada a Blockchain...", "info");
+            showToast("Asignación enviada a Blockchain...", "info");
 
-            await transferProduct(BigInt(productId), newOwner as `0x${string}`)
+            const txTransfer = await transferProduct(BigInt(productId), newOwner as `0x${string}`)
+            // PONER EN COLA LA ACCIÓN
+            queueAction('TRANSFERRED', {
+                id: Number(productId),
+                txHash: txTransfer,
+                newOwner: newOwner,
+                expectedHash: product?.characterizationHash || ""
+            });
 
+            // CERRAR MODAL
+            if (onSuccess) onSuccess();
+
+            showToast("Asignación firmada. Procesando...", "info");
         } catch (error) {
-            console.error("Error al transferir:", error);
-            showToast("Error en la transferencia", "error");
+            console.error("Error al asignar:", error);
+            showToast("Error en la asignación", "error");
             if (onRollback) {
                 onRollback(productId)
             }
@@ -107,16 +80,13 @@ export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSucc
             isPending,
             isConfirming,
             isSuccess,
-            isTransferingDB,
             loadingDB,
             loadingBC
         },
         errors: {
             readError,
             readErrorDB,
-            writeError,
-            errorDB
+            writeError
         }
     }
-
 }

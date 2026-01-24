@@ -1,9 +1,9 @@
 'use client' // CLAVE. Habilita los Hooks.
 
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useEffect} from 'react'
 import { useGetProductFromDB } from '@/hooks/api/useGetProductFromDB'
 import { useGetEventListFromDB } from '@/hooks/api/useGetEventListFromDB'
-
+import { useProductCreationStore } from '@/store/useProductCreationStore';
 import ProductDetailCard from '@/components/products/detail/ProductDetailCard'
 import ProductNavigation from '@/components/products/detail/ProductNavigation'
 import Link from 'next/link'
@@ -19,12 +19,34 @@ export default function ProductView({ productId}: Props) {
     const { productDB, isLoading, refetch: refetchProduct, setProductDB } = useGetProductFromDB(productId)
     const { eventListDB, refetch: refetchEvents, setEventListDB  } = useGetEventListFromDB(productId)
 
+    const lastWorkerUpdate = useProductCreationStore(state => state.lastWorkerUpdate);
+
+    useEffect(() => {
+        // Si hay una actualización Y es para este producto (compara IDs)
+        if (lastWorkerUpdate && String(lastWorkerUpdate.lookupId) === String(productId)) {
+            setProductDB((prev) => {
+                if (!prev) return prev;
+                // Aquí aplica estos cambios isVerified: true (Mata el spinner), active: false (Si fue borrado), pendingTxHash: undefined (Limpia hash)
+                return {
+                    ...prev,
+                    ...lastWorkerUpdate.changes
+                };
+            });
+
+            // Recargar eventos para ver el tarjeta de borrado confirmado
+            refetchEvents();
+        }
+    }, [lastWorkerUpdate, productId, setProductDB]);
+
     const handleUpdateData = useCallback((optimisticNewOwner?: string, newEvent?: Event) => {
         // SI HAY DATO NUEVO, LO PINTA AL INSTANTE (OPTIMISTIC UI)
         if (optimisticNewOwner && productDB && newEvent) {
             setProductDB({
                 ...productDB,
-                currentOwner: optimisticNewOwner, // Cambia el dueño de modo optimista antes de la confirmación                // Puedes añadir más campos si tu interfaz los necesita (ej: estado: 'TRANSFERRED')
+                currentOwner: optimisticNewOwner, // Cambia valores de modo optimista antes de confirmación
+                active: newEvent.type === 'DELETED' ? false : productDB.active,
+                isVerified: false,
+                pendingTxHash: newEvent.transactionHash || productDB.pendingTxHash
             })
             setEventListDB((eventListDB) => {
                 // Crea un array nuevo añadiendo el nuevo evento
@@ -32,12 +54,6 @@ export default function ProductView({ productId}: Props) {
             })
         }
 
-        // DE FONDO, pide los datos reales a la BD para confirmar
-        // Da un pequeño margen al backend Java para terminar de guardar
-        setTimeout(() => {
-            refetchProduct()
-            refetchEvents()
-        }, 2000)
     }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
 
     if (isLoading && !productDB) {

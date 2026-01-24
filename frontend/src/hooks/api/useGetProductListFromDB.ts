@@ -39,6 +39,6 @@ export default function useGetProductListFromDB() {
         isLoading,
         error,
         setProductListDB,
-        refecth: fetchData
+        refetch: fetchData
     }
 }

@@ -2,12 +2,12 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount } from 'wagmi'
-import { ProductDB } from '@/types/product'
+import { ProductUI } from '@/types/product'
 import { getProductFromDB } from '@/services/productApi'
 
 export function useGetProductFromDB(productId?: string | null) {
 
-    const [productDB, setProductDB] = useState<ProductDB | null>(null)
+    const [productDB, setProductDB] = useState<ProductUI | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const { address } = useAccount()

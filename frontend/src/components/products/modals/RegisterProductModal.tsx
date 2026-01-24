@@ -7,7 +7,6 @@ import { useProductCreationLogic } from '@/hooks/orchestration/useProductCreatio
 import { ActionModalProps } from '@/types/operations';
 
 {/* 1. Diccionario Industrial (Naming)
-      Para que no parezca una tienda online:
       Dueño => Custodio Actual o Operador Responsable.
       Producto => Lote de Producción o Referencia.
       Cantidad => Unidades / Volumen.
@@ -28,7 +27,8 @@ const {
       onOptimisticCreate: onOptimisticCreate,
       onRollback: (tempId) => {
           if (onRollback) onRollback(tempId, 'create')
-      }
+      },
+    onSuccess: onSuccess
   })
   //Util para evitar notificaciones duplicadas y re-renderizados de estas
   const hasNotifiedRef = useRef(false)
@@ -100,28 +100,14 @@ const {
         {/* --- GESTIÓN DE ERRORES VISUAL --- */}
         {/* A. Error Blockchain */}
         {errors.blockchainError && (
-          <div className="bg-red-50 ...">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded text-sm">
             {errors.blockchainError.message.includes("User denied") || errors.blockchainError.message.includes("rejected")
               ? "Operación cancelada por el usuario."
-              : errors.blockchainError.message // Si es otro error, se muestra
+              : "Error al firmar la transacción."
+              // : errors.blockchainError.message // Si es otro error, se muestra
             }
           </div>
         )}
-
-        {/* B. Error Base de Datos (Caso Limbo) */}
-        {status.isSuccess && errors.errorDB && (
-          <div className="bg-orange-50 border border-orange-200 p-3 rounded text-center">
-            <p className="text-orange-700 font-bold text-sm">⚠️ Registrado en Blockchain, pero falló en BD</p>
-            <p className="text-orange-600 text-xs mt-1">{errors.errorDB}</p>
-          </div>
-        )}
-        {/* C. Éxito Total */}
-        {status.isSuccess && !errors.errorDB && !status.isSavingDB && (
-          <p className="text-green-600 font-bold text-center text-lg animate-pulse">
-            ✅ Lote Registrado Exitosamente!
-          </p>
-        )}
-
         {/* BOTÓN DE REGISTER */}
         {status.isPending || status.isConfirming ? (
           <p className="text-blue-500 mt-2">Transacción en proceso...</p>
@@ -130,9 +116,9 @@ const {
             <button
               type="submit"
               className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!formData.quantity || !formData.name || status.isGlobalLoading}
+              disabled={!formData.quantity || !formData.name || status.isPending || status.isConfirming}
             >
-              {status.isGlobalLoading ? 'Procesando...' : 'Registrar Lote'}
+              {status.isPending ? 'Procesando...' : 'Registrar Lote'}
             </button>
           )
         )}
