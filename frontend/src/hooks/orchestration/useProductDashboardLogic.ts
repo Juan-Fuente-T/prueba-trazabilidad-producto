@@ -8,7 +8,7 @@ import { Event } from '@/types/events'
 
 export function useProductDashboardLogic() {
     const { productListDB, setProductListDB, isLoading, error, refetch } = useGetProductListFromDB()
-    const lastWorkerUpdate = useProductCreationStore(state => state.lastWorkerUpdate);
+    const lastLocalProductUpdate = useProductCreationStore(state => state.lastLocalProductUpdate);
     const removePendingVerification = useProductCreationStore(s => s.removePendingVerification);
     const refreshTrigger = useProductCreationStore(state => state.refreshTrigger);
 
@@ -17,21 +17,21 @@ export function useProductDashboardLogic() {
     // Actualizar el producto de la optimisc UI con los cambios de la blockchain
     // -----------------------------------------------------------------------
     useEffect(() => {
-        if (lastWorkerUpdate) {
+        if (lastLocalProductUpdate) {
             setProductListDB((prevList) => prevList.map(product => {
                 // Comparamos IDs como String para seguridad (TempId suele ser string, ID real number)
-                if (String(product.blockchainId) === String(lastWorkerUpdate.lookupId)) {
+                if (String(product.blockchainId) === String(lastLocalProductUpdate.targetId)) {
                     // Aplica los cambios que vengan. Si es Creación: Cambiará blockchainId, isVerified, y hash.
                     // Si es Borrado: Cambiará active a false. Si es Transfer: Cambiará currentOwner.
                     return {
                         ...product,
-                        ...lastWorkerUpdate.changes
+                        ...lastLocalProductUpdate.changes
                     };
                 }
                 return product;
             }));
         }
-    }, [lastWorkerUpdate, setProductListDB]);
+    }, [lastLocalProductUpdate, setProductListDB]);
 
 
     // -----------------------------------------------------------------------

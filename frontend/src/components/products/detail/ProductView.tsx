@@ -19,24 +19,24 @@ export default function ProductView({ productId}: Props) {
     const { productDB, isLoading, refetch: refetchProduct, setProductDB } = useGetProductFromDB(productId)
     const { eventListDB, refetch: refetchEvents, setEventListDB  } = useGetEventListFromDB(productId)
 
-    const lastWorkerUpdate = useProductCreationStore(state => state.lastWorkerUpdate);
+    const lastLocalProductUpdate = useProductCreationStore(state => state.lastLocalProductUpdate);
 
     useEffect(() => {
         // Si hay una actualización Y es para este producto (compara IDs)
-        if (lastWorkerUpdate && String(lastWorkerUpdate.lookupId) === String(productId)) {
+        if (lastLocalProductUpdate && String(lastLocalProductUpdate.targetId) === String(productId)) {
             setProductDB((prev) => {
                 if (!prev) return prev;
                 // Aquí aplica estos cambios isVerified: true (Mata el spinner), active: false (Si fue borrado), pendingTxHash: undefined (Limpia hash)
                 return {
                     ...prev,
-                    ...lastWorkerUpdate.changes
+                    ...lastLocalProductUpdate.changes
                 };
             });
 
             // Recargar eventos para ver el tarjeta de borrado confirmado
             refetchEvents();
         }
-    }, [lastWorkerUpdate, productId, setProductDB]);
+    }, [lastLocalProductUpdate, productId, setProductDB]);
 
     const handleUpdateData = useCallback((optimisticNewOwner?: string, newEvent?: Event) => {
         // SI HAY DATO NUEVO, LO PINTA AL INSTANTE (OPTIMISTIC UI)
@@ -55,6 +55,11 @@ export default function ProductView({ productId}: Props) {
         }
 
     }, [refetchProduct, refetchEvents, productDB, setProductDB, setEventListDB])
+
+    const handleFullRollback = () => {
+        refetchProduct(); // Limpia datos de producto optimistic
+        refetchEvents();  // Limpia el historial (quita el evento falso)
+    };
 
     if (isLoading && !productDB) {
         return <div className="mt-20 mb-20 text-center text-acero-700 text-lg">Cargando lote...</div>
@@ -85,7 +90,7 @@ export default function ProductView({ productId}: Props) {
         <main className="min-h-screen bg-acero-50">
             <div className="container mx-auto px-4 py-8">
                 <ProductNavigation currentId={numericId} />
-                <ProductDetailCard productDB={productDB} eventListDB={eventListDB} onDataUpdate={handleUpdateData}/>
+                <ProductDetailCard productDB={productDB} eventListDB={eventListDB} onDataUpdate={handleUpdateData} onRefetch={handleFullRollback}/>
             </div>
         </main>
     )

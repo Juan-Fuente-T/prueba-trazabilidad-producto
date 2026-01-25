@@ -10,13 +10,12 @@ import { Web3AuthConnector } from "@web3auth/web3auth-wagmi-connector";
 import { Web3Auth } from "@web3auth/modal";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
-// const ALCHEMY_URL = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
-const ALCHEMY_URL = "https://ethereum-sepolia-rpc.publicnode.com";
+const RPC_URL = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0x" + sepolia.id.toString(16),
-  rpcTarget: ALCHEMY_URL,
+  rpcTarget: RPC_URL,
   displayName: "Sepolia Testnet",
   blockExplorer: "https://sepolia.etherscan.io",
   ticker: "ETH",
@@ -73,7 +72,7 @@ export const config = createConfig({
   chains: [sepolia],
   transports: {
     // [sepolia.id]: http(),
-    [sepolia.id]: http(ALCHEMY_URL, {
+    [sepolia.id]: http(RPC_URL, {
         batch: { wait: 16 }, // Optimización para agrupar llamadas
     }),
   },

@@ -45,17 +45,13 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
 
     useEffect(() => {
         // Si hay éxito real y NO se ha notificado todavía...
-        if (status.isSuccess && !status.isTransferingDB && !hasNotifiedRef.current) {
+        if (status.isSuccess && !hasNotifiedRef.current) {
             hasNotifiedRef.current = true
-            //  const timer = setTimeout(() => {
-            //     onSuccess()
-            //     onClose()
-            // }, 2000)
-            // return () => clearTimeout(timer)
+            // Si el modal sigue abierto (fallo de optimist UI), esto asegura el cierre final.
             onSuccess({ newOwner: newOwner, txHash: txHash || "0xHashNoDisponible" })
         }
         // }, [status.isSuccess, status.isTransferingDB, onSuccess, onClose])
-    }, [status.isSuccess, status.isTransferingDB, newOwner, onSuccess])
+    }, [status.isSuccess, newOwner, onSuccess])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Asignar Lote">
@@ -107,7 +103,7 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                     <div className="bg-red-50 p-2 rounded border border-red-200">
                         <p className="text-red-600 text-xs text-center break-words">
                             {/* Error: {errors.writeError?.message || errors.readError?.message || errors.readErrorDB || errors.errorDB} */}
-                            Error: {errors.readError?.message || errors.readErrorDB || errors.errorDB}
+                            Error: {errors.readError?.message || errors.readErrorDB }
                         </p>
                     </div>
                 )}
@@ -119,9 +115,9 @@ export default function TransferProductModal({ isOpen, onClose, preFilledId, onS
                     <button
                         type="submit"
                         className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-                        disabled={!productId || !newOwner || !isOwner || status.isPending || status.isConfirming || status.isTransferingDB}
+                        disabled={!productId || !newOwner || !isOwner || status.isPending || status.isConfirming }
                     >
-                        {status.isPending || status.isConfirming || status.isTransferingDB ? 'Procesando...' : 'Asignar Lote'}
+                        {status.isPending || status.isConfirming  ? 'Procesando...' : 'Asignar Lote'}
                     </button>
                 )}
             </form>

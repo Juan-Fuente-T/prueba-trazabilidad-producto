@@ -14,7 +14,8 @@ import { useToast } from '@/context/ToastContext';
  */
 export default function GlobalVerificationManager() {
     const pendingVerifications = useProductCreationStore(s => s.pendingVerifications);
-    const triggerRefresh = useProductCreationStore(s => s.triggerRefresh);
+    // const triggerRefresh = useProductCreationStore(s => s.triggerRefresh);
+    const notifyLocalProductUpdate = useProductCreationStore(s => s.notifyLocalProductUpdate);
     const removePendingVerification = useProductCreationStore(s => s.removePendingVerification);
     const { showToast } = useToast();
 
@@ -25,7 +26,12 @@ export default function GlobalVerificationManager() {
         onItemVerified: (verifiedId) => {
             // console.log(`LOTE ${verifiedId} VERIFICADO!`);
             removePendingVerification(verifiedId);// Quita de la lista de pendientes (ya está verificado)
-            triggerRefresh();// Avisa a la app para que quite el spinner (Refetch)
+            // Busca el producto con ese ID y le envía los datos de verificación
+            notifyLocalProductUpdate(verifiedId, {
+                isVerified: true,
+                pendingTxHash: undefined
+            });
+            // triggerRefresh();// Avisa a la app para que quite el spinner (Refetch)
             showToast(`Lote #${verifiedId} verificado en Blockchain.`, "success");
         }
     });

@@ -1,7 +1,8 @@
 import { Event } from '@/types/events'
 import { formatDate, shortenAddress } from '@/utils/formatters'
 import { getRoleName } from '@/utils/roleUtils'
-import { getEventBadgeColor, getShortDescription } from '@/utils/eventUiUtils'
+// import { getEventBadgeColor, getShortDescription } from '@/utils/eventUiUtils'
+import { getEventBadgeColor } from '@/utils/eventUiUtils'
 
 interface Props {
     event: Event
@@ -45,9 +46,9 @@ export default function HistoryCard({ event }: Props) {
                 </div>
 
                 {/* DESCRIPCIÓN */}
-                <p className="text-xs font-medium text-acero-700 mb-2">
+                {/* <p className="text-xs font-medium text-acero-700 mb-2">
                     {getShortDescription(event.type)}
-                </p>
+                </p> */}
             </div>
 
             {/* PARTE INFERIOR (Flujo de direcciones) */}

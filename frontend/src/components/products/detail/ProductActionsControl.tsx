@@ -10,10 +10,11 @@ import { TransferSuccessData, DeleteSuccessData } from '@/types/operations';
 interface Props {
     product: ProductUI;
     onDataUpdate: (newOwner?: string, newEvent?: Event) => void;
+    onRefetch: () => void;
 }
 const BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
+export const ProductActionsControl = ({ product, onDataUpdate, onRefetch }: Props) => {
 
     // Lógica auxiliar para crear el evento y actualizar
     const handleSuccess = (txHash: string, type: 'TRANSFERRED' | 'DELETED', newOwner: string) => {
@@ -27,6 +28,12 @@ export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
         );
         onDataUpdate(newOwner, optimisticEvent);
     };
+    // Esta función se ejecuta si el Modal/Hook falla y pide deshacer la optimisctic UI
+    const handleRollback = () => {
+        console.log("🔙 Rollback solicitado: Recargando producto desde API...");
+        onRefetch();
+    };
+
     return (
         <div className="flex w-full gap-3 w-full lg:w-auto flex-row shrink-0 justify-center">
             {/* ASIGNAR */}
@@ -35,6 +42,16 @@ export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
                 buttonColor="bg-industrial hover:bg-industrial-dark"
                 ModalComponent={TransferProductModal}
                 preFilledId={product.blockchainId.toString()}
+                modalProps={{
+                    onOptimisticUpdate: (partialProduct: Partial<ProductUI>) => {
+                        if (partialProduct.currentOwner) {
+                            // Usa hash temporal para optimistic UI
+                            handleSuccess("0xTempHash", 'TRANSFERRED', partialProduct.currentOwner);
+                        }
+                    },
+                    //TypeScript permite la flexibilidad de ignorar argumentos no usados, en este rollback ambos
+                    onRollback: () => handleRollback()
+                }}
                 onSuccess={(data) => {
                     const transferData = data as TransferSuccessData;
                     if (transferData?.txHash) {
@@ -51,8 +68,10 @@ export const ProductActionsControl = ({ product, onDataUpdate }: Props) => {
                 preFilledId={product.blockchainId.toString()}
                 modalProps={{
                     onOptimisticDelete: () => {
+                        // Usa hash temporal para optimistic UI
                         handleSuccess("0xTempHash", 'DELETED', BURN_ADDRESS);
-                    }
+                    },
+                    onRollback: () => handleRollback()
                 }}
                 // Cuando el modal confirma que ha firmado (onSuccess),recibe el hash REAL
                 // y lo sobreescribe al producto para después verificarlo.

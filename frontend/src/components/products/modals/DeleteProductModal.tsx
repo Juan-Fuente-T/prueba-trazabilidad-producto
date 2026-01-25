@@ -18,7 +18,7 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
         status,
         errors
     } = useProductDeleteLogic({
-        onOptimisticDelete,
+        onOptimisticDelete:onOptimisticDelete,
         onSuccess: onClose,
         onRollback: (id) => {
             if (onRollback) onRollback(id, 'delete')
@@ -29,10 +29,9 @@ export default function DeleteProductModal({ isOpen, onClose, preFilledId, onSuc
     const hasNotifiedRef = useRef(false)
 
     useEffect(() => {
+        // Si está abierto y ha llegado un ID prefijado, se asigna.
         if (isOpen) {
             hasNotifiedRef.current = false
-
-            // Si está abierto y ha llegado un ID prefijado, se asigna.
             if (preFilledId) {
                 setProductId(preFilledId)
             } else {

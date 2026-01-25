@@ -1,6 +1,6 @@
 'use client'
 
-// import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Image from 'next/image'
 import { useConnect, useAccount, useDisconnect } from 'wagmi'
 
@@ -80,13 +80,13 @@ export default function Header() {
                 )}
 
                 {/* Botón RainbowKit (Siempre visible) */}
-                {/* <div className="flex flex-shrink-0">
+                <div className="flex flex-shrink-0">
                     <ConnectButton
                         showBalance={{ smallScreen: false, largeScreen: false }} // Más limpio sin saldo
                         accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
                         chainStatus="icon" // Solo icono de red para ahorrar espacio
                     />
-                </div> */}
+                </div>
 
             </div>
         </header>

@@ -15,9 +15,10 @@ interface ProductDetailCardProps {
     productDB: ProductUI;
     eventListDB: Event[];
     onDataUpdate: (newOwner?: string, newEvent?: Event) => void;
+    onRefetch: () => void;
 }
 
-export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate }: ProductDetailCardProps) {
+export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate, onRefetch }: ProductDetailCardProps) {
     const { address } = useAccount();
     const { activeProductsQuantity, updateActiveProductsQuantity } = useProductMetrics();
 
@@ -81,6 +82,7 @@ export default function ProductDetailCard({ productDB, eventListDB, onDataUpdate
                                         <ProductActionsControl
                                             product={productDB}
                                             onDataUpdate={onDataUpdate}
+                                            onRefetch={onRefetch}
                                         />
                                     </div>
                                 )}

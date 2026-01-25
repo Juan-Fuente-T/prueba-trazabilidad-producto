@@ -17,8 +17,9 @@ export default function ProductCreationBackgroundManager() {
     const setProcessing = useProductCreationStore(s => s.setProcessing);
     const clearQueue = useProductCreationStore(s => s.clearQueue);
 
-    const notifyWorkerUpdate = useProductCreationStore(s => s.notifyWorkerUpdate);
+    const notifyLocalProductUpdate = useProductCreationStore(s => s.notifyLocalProductUpdate);
     const addPendingVerification = useProductCreationStore(s => s.addPendingVerification);
+    const removePendingVerification = useProductCreationStore(s => s.removePendingVerification);
     const triggerRefresh = useProductCreationStore(s => s.triggerRefresh);
 
     const { address } = useAccount();
@@ -33,7 +34,7 @@ export default function ProductCreationBackgroundManager() {
     // Vigila si hay transacciones pendientes
     // -------------------------------------------------------------------------
 
-    const { isSuccess } = useWaitForTransactionReceipt({
+    const { isSuccess, isError, error: txError } = useWaitForTransactionReceipt({
         hash: pendingAction?.data.txHash as `0x${string}`,
         query: { enabled: !!pendingAction?.data.txHash }
     });
@@ -61,7 +62,7 @@ export default function ProductCreationBackgroundManager() {
 
                         await saveToDB({ product: baseProduct as ProductPayload['product'], creationTxHash: data.txHash });
 
-                        notifyWorkerUpdate(data.tempId!, { blockchainId: realId, isVerified: true, pendingTxHash: undefined });
+                        notifyLocalProductUpdate(data.tempId!, { blockchainId: realId, isVerified: true, pendingTxHash: undefined });
                         addPendingVerification({ id: realId, hash: data.creationHash! });
 
                         showToast(`Lote #${realId} creado.`, "success");
@@ -74,7 +75,7 @@ export default function ProductCreationBackgroundManager() {
                             txHash: data.txHash,
                             expectedProductHash: data.expectedHash!
                         });
-                        notifyWorkerUpdate(data.id!, { active: false, isVerified: true, pendingTxHash: undefined });
+                        notifyLocalProductUpdate(data.id!, { active: false, isVerified: true, pendingTxHash: undefined });
                         addPendingVerification({ id: data.id!, hash: data.txHash });
 
                         showToast("Baja confirmada.", "success");
@@ -89,7 +90,7 @@ export default function ProductCreationBackgroundManager() {
                             expectedProductHash: data.expectedHash!
                         });
 
-                        notifyWorkerUpdate(data.id!, { currentOwner: data.newOwner!, isVerified: true, pendingTxHash: undefined });
+                        notifyLocalProductUpdate(data.id!, { currentOwner: data.newOwner!, isVerified: true, pendingTxHash: undefined });
                         addPendingVerification({ id: data.id!, hash: data.txHash });
 
                         showToast("Asignación confirmada.", "success");
@@ -109,8 +110,26 @@ export default function ProductCreationBackgroundManager() {
 
             executeAction();
         }
-    }, [isSuccess, pendingAction, isProcessing, address, updateProductId, saveToDB, deleteToDB, transferToDB, notifyWorkerUpdate, addPendingVerification, triggerRefresh, showToast, setProcessing, clearQueue]);
+    }, [isSuccess, pendingAction, isProcessing, address, updateProductId, saveToDB, deleteToDB, transferToDB, notifyLocalProductUpdate, addPendingVerification, triggerRefresh, showToast, setProcessing, clearQueue]);
 
-    return null;
+    // -------------------------------------------------------------------------
+    // EFECTOS (ROLLBACK PARA ERRORES)
+    // -------------------------------------------------------------------------
+    useEffect(() => {
+        if (isError && pendingAction) {
+            console.error("BACKGROUND MANAGER -La transacción falló en Blockchain:", txError);
+            const { type, data } = pendingAction;
+            showToast(`Error: La operación ${type} falló en la red. Deshaciendo cambios...`, "error");
+
+            // Dispara refresco global para sobreescribir el dato optimista falso.
+            triggerRefresh();
+
+            // Limpieza de colas de verificación
+            if (data.id) removePendingVerification(data.id);
+            if (data.tempId) removePendingVerification(data.tempId);
+            setProcessing(false);
+            clearQueue();
+        }
+    }, [isError, pendingAction, txError, showToast, triggerRefresh, removePendingVerification, setProcessing, clearQueue]);
     return null; // Componente solo lógico, no pinta datos
 }

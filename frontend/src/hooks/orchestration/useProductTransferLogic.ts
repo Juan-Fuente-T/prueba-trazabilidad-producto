@@ -8,7 +8,7 @@ import { ProductUI } from '@/types/product'
 
 interface UseProductTransferLogicProps {
     onOptimisticUpdate?: (product: Partial<ProductUI>) => void;
-    onRollback?: (tempId: string) => void;
+    onRollback?: (tempId: string | number) => void;
     onSuccess?: () => void;
 }
 
@@ -42,10 +42,10 @@ export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSucc
                     isVerified: false
                 })
             }
-            if (onSuccess) onSuccess();
-            showToast("Asignación enviada a Blockchain...", "info");
-
+            showToast("Solicitando firma para asignación ...", "info");
+            // writeContractAsync devuelve el hash en milisegundos tras la firma.
             const txTransfer = await transferProduct(BigInt(productId), newOwner as `0x${string}`)
+
             // PONER EN COLA LA ACCIÓN
             queueAction('TRANSFERRED', {
                 id: Number(productId),
@@ -61,6 +61,7 @@ export const useProductTransferLogic = ({ onOptimisticUpdate, onRollback, onSucc
         } catch (error) {
             console.error("Error al asignar:", error);
             showToast("Error en la asignación", "error");
+            // ROLLBACK (Si falla, revierte a los valores anteriores)
             if (onRollback) {
                 onRollback(productId)
             }

@@ -19,7 +19,20 @@ export type OperationResult = TransferSuccessData | DeleteSuccessData | CreateSu
 
 export type OperationResultWithID = OperationResult & { id: string };
 
-// Tipo general para los modales de transacciones
+/**
+ * ActionModalProps
+ * ----------------
+ * Interfaz compartida para los modales de acción.
+ *
+ * NOTA SOBRE 'onRollback':
+ * Se define recibiendo (id, type) porque el Dashboard necesita esos datos
+ * para localizar y revertir el cambio en la fila exacta de la lista.
+ *
+ * Sin embargo, en la Ficha de Producto (donde no hay lista), es válido pasar
+ * una función que ignore esos parámetros y simplemente recargue: () => refetch().
+ *
+ * TypeScript permite esta flexibilidad (ignorar argumentos no usados) sin dar error.
+ */
 export interface ActionModalProps {
     isOpen: boolean;
     onClose: () => void;

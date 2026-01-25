@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ProductUI } from '@/types/product';
-import { PendingItem, TypeEvent, ActionPayload, PendingAction, WorkerUpdate } from '@/types/events';
+import { PendingItem, TypeEvent, ActionPayload, PendingAction, LocalProductUpdate } from '@/types/events';
 
 // Define datos a guardar mientras la confirmación deblockchain llega
 
@@ -10,7 +10,7 @@ interface ProductCreationState {
     isProcessing: boolean;
     // Estados auxiliares (Verificación y UI)
     pendingVerifications: { id: string | number; hash: string }[];// Cola de ventos sin verificar
-    lastWorkerUpdate: WorkerUpdate | null;
+    lastLocalProductUpdate: LocalProductUpdate | null;
     refreshTrigger: number;//Si el numero varía se dispara la llamada a datos
     // ACCIONES
     queueAction: (type: TypeEvent, data: ActionPayload) => void;
@@ -20,7 +20,7 @@ interface ProductCreationState {
     addPendingVerification: (item: PendingItem) => void; // ACCIONES de VERIFICACIÓN de eventos
     removePendingVerification: (id: string | number) => void;
     triggerRefresh: () => void;    // Recarga lista de productos
-    notifyWorkerUpdate: (lookupId: string | number, changes: Partial<ProductUI>) => void;
+    notifyLocalProductUpdate: (targetId: string | number, changes: Partial<ProductUI>) => void;
 }
 
 export const useProductCreationStore = create<ProductCreationState>((set) => ({
@@ -29,7 +29,7 @@ export const useProductCreationStore = create<ProductCreationState>((set) => ({
 
     pendingVerifications: [],
     refreshTrigger: 0,
-    lastWorkerUpdate: null,
+    lastLocalProductUpdate: null,
 
     queueAction: (type, data) => set({ pendingAction: { type, data } }),
     clearQueue: () => set({ pendingAction: null, isProcessing: false }),
@@ -43,5 +43,5 @@ export const useProductCreationStore = create<ProductCreationState>((set) => ({
     })),
     // Al cambiar el valor sumando 1, todos los useEffects que dependan de esto se dispararán.
     triggerRefresh: () => set((state) => ({ refreshTrigger: state.refreshTrigger + 1 })),
-    notifyWorkerUpdate: (lookupId, changes) => set({ lastWorkerUpdate: { lookupId, changes } })
+    notifyLocalProductUpdate: (targetId, changes) => set({ lastLocalProductUpdate: { targetId, changes } })
 }));

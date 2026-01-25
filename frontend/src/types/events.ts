@@ -39,7 +39,7 @@ export interface PendingAction {
     data: ActionPayload;
 }
 
-export interface WorkerUpdate {
-    lookupId: string | number;
+export interface LocalProductUpdate {
+    targetId: string | number;
     changes: Partial<ProductUI>;
 }

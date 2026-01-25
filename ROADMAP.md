@@ -7,6 +7,7 @@ Listado de mejoras técnicas, refactorizaciones y funcionalidades pendientes par
 - [ ] **Móvil:** Revisar el Header en dispositivos muy pequeños (width < 350px).
 - [ ] **Feedback:** Limpiar datos de inputs al cerrar modales y resetear mensajes de éxito/error.
 - [ ] **Interacción:** Deshabilitar botones e inputs visualmente mientras se procesan transacciones.
+- [ ] **Interacción:** Resaltar botones de nuevo custodio seleccionado antes del pulsar el boton de confirmación. No permitir a un custodio seleccione su propio botón(deshabilitar)
 - [ ] **Paginación:** Implementar paginación en el listado de lotes para manejar grandes volúmenes de datos.
 - [ ] **Home:** Valorar añadir botón manual de "Refrescar lista".
 

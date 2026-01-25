@@ -11,11 +11,7 @@ interface UseProductDeleteLogicProps {
     onSuccess?: () => void; // Para cerrar el modal
 }
 
-export const useProductDeleteLogic = ({
-    onOptimisticDelete,
-    onRollback,
-    onSuccess
-}: UseProductDeleteLogicProps = {}) => {
+export const useProductDeleteLogic = ({ onOptimisticDelete, onRollback, onSuccess }: UseProductDeleteLogicProps = {}) => {
     const queueAction = useProductCreationStore(s => s.queueAction);
     const [productId, setProductId] = useState('')
     const { showToast } = useToast()
@@ -29,7 +25,7 @@ export const useProductDeleteLogic = ({
     const { productDB, isLoading: loadingDB, error: readErrorDB } = useGetProductFromDB(idParaBuscarEnBD)
 
     const { deleteProduct, isPending, isConfirming, isSuccess, error: deleteError, hash: txHash } = useDeleteProduct()
-        const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!productId || !isOwner) return
@@ -44,6 +40,7 @@ export const useProductDeleteLogic = ({
             // writeContractAsync devuelve el hash en milisegundos tras la firma.
             const txDelete = await deleteProduct(BigInt(currentId))
 
+            // PONER EN COLA LA ACCIÓN
             queueAction('DELETED', {
                 id: Number(currentId),
                 txHash: txDelete,
