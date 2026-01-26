@@ -8,6 +8,7 @@ interface Props {
 }
 
 export default function HistoryCard({ event }: Props) {
+    console.log("EVENTO, from, to: ", event.fromAddress, event.toAddress)
     const isCreation = event.type === 'CREATED';
     const isDeleted = event.type === 'DELETED';
     const hasVerification = event.isVerified || event.verified;
@@ -15,7 +16,8 @@ export default function HistoryCard({ event }: Props) {
     const faseActual = isCreation
         ? "🏭 FABRICANTE"
         : isDeleted ? "⛔ ELIMINADO"
-            : (event.toAddress ? getRoleName(event.toAddress) : "DESCONOCIDO");
+            // : (event.toAddress ? getRoleName(event.toAddress) : "DESCONOCIDO");
+            : (event.toAddress ? getRoleName(event.fromAddress) : "DESCONOCIDO");
 
     return (
         <div className="relative h-full bg-stone-50 p-2 gap-1 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-all text-center w-48 flex-shrink-0 flex flex-col justify-between">
@@ -45,9 +47,9 @@ export default function HistoryCard({ event }: Props) {
                 </div>
 
                 {/* DESCRIPCIÓN */}
-                <p className="text-xs font-medium text-stone-700 mb-2">
+                {/* <p className="text-xs font-medium text-stone-700 mb-2">
                     {getShortDescription(event.type)}
-                </p>
+                </p> */}
             </div>
 
             {/* PARTE INFERIOR (Flujo de direcciones) */}

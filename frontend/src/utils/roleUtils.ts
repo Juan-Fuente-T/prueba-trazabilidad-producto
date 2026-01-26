@@ -1,5 +1,5 @@
 
-import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles' // 🔥 IMPORTAMOS DE CONFIG
+import { SUPPLY_CHAIN_ADDRESSES } from '@/config/supplyChainRoles';
 
 export const getRoleName = (address: string | undefined): string => {
     if (!address) return "Desconocido";
