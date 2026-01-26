@@ -1,6 +1,8 @@
 {
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
     "solidity.packageDefaultDependenciesDirectory": "lib",
+    "solidity.defaultCompiler": "remote",
+    "solidity.monoRepoSupport": true,
     "solidity.remappings": [
         "forge-std/=contracts/lib/forge-std/src/",
         "ds-test/=contracts/lib/forge-std/lib/ds-test/src/"

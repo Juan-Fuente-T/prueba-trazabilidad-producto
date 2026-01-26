@@ -6,7 +6,6 @@ import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.request.Tran
 import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.request.DeleteProductRequest;
 import com.juanfuente.trazabilidad_producto_blockchain.DTOs.product.response.ProductResponse;
 import com.juanfuente.trazabilidad_producto_blockchain.model.Product;
-import com.juanfuente.trazabilidad_producto_blockchain.model.ProductEvent;
 import com.juanfuente.trazabilidad_producto_blockchain.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
