@@ -8,9 +8,9 @@ services:
     restart: unless-stopped
     ports:
       - "8081:8080"
+    env_file:
+      - .env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       # Límites de memoria para que no se caiga por exceder límites (ram en reposo y limite en uso)
       - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
-      - MONGO_URL=${MONGO_URL}
