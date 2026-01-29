@@ -1,14 +1,13 @@
 /**
- * 🛠️ CONFIGURACIÓN DE COMPATIBILIDAD WEB3
- * * El SDK de MetaMask y algunas librerías de WalletConnect intentan cargar módulos
+ * CONFIGURACIÓN DE COMPATIBILIDAD WEB3
+ * El SDK de MetaMask y algunas librerías de WalletConnect intentan cargar módulos
  * pensados para React Native (móvil) como 'fs', 'net' o 'async-storage'.
- * * Este bloque le dice a Webpack que ignore esas librerías porque estamos en un
+ * Este bloque le dice a Webpack que ignore esas librerías porque estamos en un
  * entorno Web (Navegador), evitando errores de compilación.
  */
 
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
 
   turbopack: {},
