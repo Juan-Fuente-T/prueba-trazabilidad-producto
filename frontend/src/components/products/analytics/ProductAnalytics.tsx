@@ -32,21 +32,22 @@ export default function ProductAnalytics({ activeProductsQuantity, events }: Ana
         { name: 'Este Lote', value: 1 },
         { name: 'Resto Producción', value: safeTotal - 1 }
     ]
+
     // DATOS PARA EL TIMELINE: Tiempo entre fases, diferencias de tiempo entre eventos consecutivos
     const timelineData: TimelineData[] = events.map((event, index, array) => {
         if (index === 0) return null // El primer evento (creación) no tiene "duración previa"
-
         const prevEvent = array[index - 1]
         // Diferencia en horas, partiendo de SEGUNDOS (Blockchain usa segundos)
-        const diffSeconds = Number(event.timestamp) - Number(prevEvent.timestamp)
-        const diffHours = (diffSeconds / 3600).toFixed(2)
+        const diffMilliSeconds = Number(event.timestamp) - Number(prevEvent.timestamp)
+        const diffHours = (diffMilliSeconds / (1000 * 60 * 60)).toFixed(2)
         // Nombres de fase. La fase empieza donde terminó el evento ANTERIOR (prevEvent.toAddress)
         // Y termina donde llega el evento ACTUAL (event.toAddress)
         const startRole = getRoleName(prevEvent.toAddress)
         const endRole = getRoleName(event.toAddress)
 
+                                            console.log("hours 1", parseFloat(diffHours))
         return {
-            phase: `${startRole} ➔ ${getRoleName(endRole)}`, // Ej: Lonja -> Enlatado
+            phase: `${startRole} ➔ ${endRole}`, // Ej: Lonja -> Enlatado
             hours: parseFloat(diffHours)
         }
     }).filter((item): item is TimelineData => item !== null) // FILTRO DE TIPOS
@@ -62,21 +63,29 @@ export default function ProductAnalytics({ activeProductsQuantity, events }: Ana
                 <div className="h-48 w-full text-xs font-mono">
                     {timelineData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            {/* <BarChart data={timelineData as unknown[]} layout="vertical"> */}
-                            <BarChart data={timelineData} layout="vertical" margin={{ left: 10, right: 30, top: 5, bottom: 5 }}>
+                            <BarChart data={timelineData} layout="vertical" margin={{ left: 10, right: 50, top: 5, bottom: 5 }}>
                                 <XAxis type="number" hide />
                                 <YAxis dataKey="phase" type="category" width={110} tick={{ fontSize: 10, fill: '#64748b' }} />
                                 <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '4px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                <Bar dataKey="hours" fill="#64748b" radius={[0, 4, 4, 0]} barSize={24}>
+                                <Bar dataKey="hours" fill="#64748b" radius={[0, 4, 4, 0]} barSize={15} activeBar={false} minPointSize={5}>
                                     <LabelList
                                         dataKey="hours"
                                         position="right"
-                                        formatter={(val: unknown) => `${val}h`}
+                                        formatter={(val: unknown) => {
+                                            console.log("hours 2", val)
+                                            const num = Number(val);
+                                            if (num === 0) return "0h";
+                                            // Si es menos de 1 hora, muestra minutos
+                                            if (num < 1) {
+                                                const m = Math.round(num * 60);
+                                                return `${m > 0 ? m : '<1'}m`;
+                                            }
+                                            return `${num.toFixed(2)}h`;
+                                        }}
                                         style={{ fontSize: '10px', fontWeight: 'bold', fill: '#0ea5e9' }}
                                     />
                                 </Bar>
                             </BarChart>
-                            {/* <Bar dataKey="hours" fill="#64748b" radius={[0, 4, 4, 0]} barSize={20} />                            </BarChart> */}
                         </ResponsiveContainer>
                     ) : (
                         <div className="h-full flex items-center justify-center text-acero-400 italic">
