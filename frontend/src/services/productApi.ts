@@ -9,14 +9,14 @@
  */
 import { ProductDB, ProductPayload, TransferProductPayload, DeleteProductPayload } from '@/types/product'
 
-const apiURL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/products";
 
 // ==========================================
 // ESCRITURA (POST) - ACCIONES
 // ==========================================
 export const saveProductToDB = async (payload: ProductPayload): Promise<ProductDB> => {
     try {
-    const txProduct = await fetch(`${apiURL}`, {
+    const txProduct = await fetch(`${BASE_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -35,7 +35,7 @@ export const saveProductToDB = async (payload: ProductPayload): Promise<ProductD
 }
 export const transferProductToDB = async (payload: TransferProductPayload): Promise<ProductDB> => {
     try {
-    const txTransfer = await fetch(`${apiURL}/transfer`, {
+    const txTransfer = await fetch(`${BASE_URL}/transfer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -55,7 +55,7 @@ export const transferProductToDB = async (payload: TransferProductPayload): Prom
 
 export const deleteProductToDB = async (payload: DeleteProductPayload): Promise<ProductDB> => {
     try {
-    const txDelete = await fetch(`${apiURL}/delete`, {
+    const txDelete = await fetch(`${BASE_URL}/delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -78,7 +78,7 @@ export const deleteProductToDB = async (payload: DeleteProductPayload): Promise<
 // ==========================================
 export const getProductFromDB = async (productId: string) => {
     try {
-        const response = await fetch(`${apiURL}/${productId}`, {
+        const response = await fetch(`${BASE_URL}/${productId}`, {
             cache: 'no-store'
         })
         if (!response.ok) {
@@ -95,7 +95,7 @@ export const getProductFromDB = async (productId: string) => {
 
 export const getProductListFromDB = async () => {
     try {
-        const response = await fetch(`${apiURL}`, {
+        const response = await fetch(`${BASE_URL}`, {
             cache: 'no-store'
         })
         if (!response.ok) {
@@ -114,7 +114,7 @@ export const getProductListFromDB = async () => {
 
 export const getEventListFromDB = async (productId: string) => {
     try {
-    const response = await fetch(`${apiURL}/${productId}/history`, {
+    const response = await fetch(`${BASE_URL}/${productId}/history`, {
             cache: 'no-store'
         })
     if (!response.ok) {

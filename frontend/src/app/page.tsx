@@ -4,6 +4,7 @@ import ProductList from '@/components/products/listing/ProductList'
 import QuickOperationsPanel from '@/components/products/QuickOperationsPanel'
 import RegisterProductModal from '@/components/products/modals/RegisterProductModal'
 import GenericActionController from '@/components/ui/GenericActionController'
+import WelcomeFundsManager from '@/components/onboarding/WelcomeFundsManager'
 import { useProductDashboardLogic } from '@/hooks/orchestration/useProductDashboardLogic'
 import { useAccount } from 'wagmi'
 import { ProductUI } from '@/types/product'
@@ -20,6 +21,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-acero-50 ">
+      <WelcomeFundsManager />
       <div className="container mx-auto px-4 py-8">
         {/* CABECERA*/}
         <div className="flex  flex-col justify-between items-end">
