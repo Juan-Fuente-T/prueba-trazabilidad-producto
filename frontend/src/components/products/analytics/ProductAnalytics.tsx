@@ -45,7 +45,6 @@ export default function ProductAnalytics({ activeProductsQuantity, events }: Ana
         const startRole = getRoleName(prevEvent.toAddress)
         const endRole = getRoleName(event.toAddress)
 
-                                            console.log("hours 1", parseFloat(diffHours))
         return {
             phase: `${startRole} ➔ ${endRole}`, // Ej: Lonja -> Enlatado
             hours: parseFloat(diffHours)
@@ -72,7 +71,6 @@ export default function ProductAnalytics({ activeProductsQuantity, events }: Ana
                                         dataKey="hours"
                                         position="right"
                                         formatter={(val: unknown) => {
-                                            console.log("hours 2", val)
                                             const num = Number(val);
                                             if (num === 0) return "0h";
                                             // Si es menos de 1 hora, muestra minutos

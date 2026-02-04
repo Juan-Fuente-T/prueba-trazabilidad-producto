@@ -8,33 +8,34 @@ export default function WelcomeFundsManager() {
     const { address, isConnected } = useAccount()
     const [isOpen, setIsOpen] = useState(false)
     // const [amount, setAmount] = useState<string>("0.02")
-
+    const [loading, setLoading] = useState(false)
+    const [status, setStatus] = useState('idle') // 'idle', 'sending', 'success', 'error'
     const hasCheckedRef = useRef(false)
 
     useEffect(() => {
         const checkAndRequestFunds = async () => {
-            if (!isConnected || !address || hasCheckedRef.current) return
+            if (!isConnected || !address || hasCheckedRef.current || loading) return
+            setStatus('sending');
 
             try {
                 hasCheckedRef.current = true
+                setLoading(true)
 
                 const response = await fetch('/api/faucet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userAddress: address })
                 })
-
                 const data = await response.json()
 
-                // SOLO MOSTRAR SI REALMENTE SE ENVIARON FONDOS
-                // Si el usuario ya tenía saldo, data.sent será false (según tu API)
-                // Asumo que tu API devuelve { success: true, sent: true/false, ... } 
-                // Si tu API anterior devuelve txHash solo si envía, úsalo como condición.
-
-                if (data.success && data.txHash) {
-                    setIsOpen(true)
+                if (data.needsFunds) {
+                    setIsOpen(true);
+                    if (data.success) {
+                        setStatus('success');
+                    } else {
+                        setStatus('error');
+                    }
                 }
-
             } catch (error) {
                 console.error("Error en faucet:", error)
             }
