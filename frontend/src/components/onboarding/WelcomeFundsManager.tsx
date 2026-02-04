@@ -13,45 +13,45 @@ export default function WelcomeFundsManager() {
     const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState('none')
     const hasCheckedRef = useRef(false)
+    const [, forceUpdate] = useState(0);
+
+    const checkAndRequestFunds = async () => {
+        if (loading) return;
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/faucet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userAddress: address })
+            });
+            const data = await response.json();
+            setStatus(data.success ? 'success' : 'error');
+        } catch (error) {
+            console.error('Error en la preparación de la cuenta:', error);
+            setStatus('error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const checkAndRequestFunds = async () => {
-            if (!isConnected || !address || hasCheckedRef.current || loading) return
+        if (balance && !hasCheckedRef.current && isConnected) {
+            const currentBalance = parseFloat(formatEther(balance.value));
 
-            if (!balance) return
-
-            if (balance && parseFloat(formatEther(balance.value)) < 0.001) {
-                hasCheckedRef.current = true
-                setLoading(true)
-                setStatus('sending')
-                setIsOpen(true)
-
-                try {
-                    const response = await fetch('/api/faucet', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userAddress: address })
-                    })
-                    const data = await response.json()
-
-                    if (data.success) {
-                        setStatus('success');
-                    } else {
-                        setStatus('error');
-                    }
-                } catch (error) {
-                    console.error("Error en faucet:", error)
-                    setStatus('error')
-                } finally {
-                    setLoading(false)
-                }
+            if (currentBalance < 0.001) {
+                hasCheckedRef.current = true;
+                setTimeout(() => {
+                    setIsOpen(true);
+                    setStatus('sending');
+                    forceUpdate(n => n + 1);
+                    checkAndRequestFunds();
+                }, 2000);
             } else {
-                // Si tiene saldo, marcamos como revisado y no hacemos NADA
-                hasCheckedRef.current = true
+                hasCheckedRef.current = true;
             }
         }
-        checkAndRequestFunds()
-    }, [isConnected, address, balance, loading])
+    }, [balance?.value, isConnected, address]);
 
     if (!isOpen) return null
 
