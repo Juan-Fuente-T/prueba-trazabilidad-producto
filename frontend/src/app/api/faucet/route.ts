@@ -38,24 +38,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Address inválida o faltante" }, { status: 400 });
         }
 
-        // Comprueba balance del usuario
-        const balanceWei = await publicClient.getBalance({ address: userAddress });
-        const balanceEth = formatEther(balanceWei);
-        console.log("------------------------------------------------");
-        console.log(`[FAUCET] Para la cuenta ${userAddress} el Balance INICIAL es: ${balanceEth} ETH`);
-
         // Comprueba si la Master Wallet tiene fondos para enviar
         const masterBalance = await publicClient.getBalance({ address: account.address });
         if (masterBalance < parseEther("0.02")) {
             console.error("❌ [FAUCET] ERROR CRÍTICO: La wallet maestra no tiene saldo.");
             return NextResponse.json({ error: "Faucet sin fondos" }, { status: 500 });
-        }
-
-        if (parseFloat(balanceEth) > 0.01) {
-            return NextResponse.json({
-                message: "El usuario ya tiene fondos suficientes",
-                sent: false
-            });
         }
 
         // Envia fondos
@@ -67,21 +54,14 @@ export async function POST(request: Request) {
             kzg: undefined,
         });
 
-        const nuevoBalanceWei = await publicClient.getBalance({ address: userAddress });
-        const nuevoBalanceEth = formatEther(nuevoBalanceWei);
-
-        console.log(`✅ [FAUCET] Envío recibido con éxito! Balance ACTUAL del usuario: ${nuevoBalanceEth} ETH`);
-        console.log("------------------------------------------------");
-
         return NextResponse.json({
             success: true,
-            needsFunds: true,
             txHash: hash,
-            message: "Fondos de bienvenida enviados correctamente"
+            message: "Proceso completado"
         });
 
     } catch (error: unknown) {
-        let errorMessage = "Error desconocido en Faucet";
+        let errorMessage = "Error desconocido en el proceso";
         if (error instanceof Error) {
             errorMessage = error.message;
         }

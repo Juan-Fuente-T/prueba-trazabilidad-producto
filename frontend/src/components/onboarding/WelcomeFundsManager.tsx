@@ -1,48 +1,57 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
+import { formatEther } from 'viem'
 import Modal from '@/components/ui/Modal'
 
 export default function WelcomeFundsManager() {
     const { address, isConnected } = useAccount()
+    const { data: balance } = useBalance({ address })
     const [isOpen, setIsOpen] = useState(false)
     // const [amount, setAmount] = useState<string>("0.02")
     const [loading, setLoading] = useState(false)
-    const [status, setStatus] = useState('idle') // 'idle', 'sending', 'success', 'error'
+    const [status, setStatus] = useState('none')
     const hasCheckedRef = useRef(false)
 
     useEffect(() => {
         const checkAndRequestFunds = async () => {
             if (!isConnected || !address || hasCheckedRef.current || loading) return
-            setStatus('sending');
 
-            try {
+            if (!balance) return
+
+            if (balance && parseFloat(formatEther(balance.value)) < 0.001) {
                 hasCheckedRef.current = true
                 setLoading(true)
+                setStatus('sending')
+                setIsOpen(true)
 
-                const response = await fetch('/api/faucet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userAddress: address })
-                })
-                const data = await response.json()
+                try {
+                    const response = await fetch('/api/faucet', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userAddress: address })
+                    })
+                    const data = await response.json()
 
-                if (data.needsFunds) {
-                    setIsOpen(true);
                     if (data.success) {
                         setStatus('success');
                     } else {
                         setStatus('error');
                     }
+                } catch (error) {
+                    console.error("Error en faucet:", error)
+                    setStatus('error')
+                } finally {
+                    setLoading(false)
                 }
-            } catch (error) {
-                console.error("Error en faucet:", error)
+            } else {
+                // Si tiene saldo, marcamos como revisado y no hacemos NADA
+                hasCheckedRef.current = true
             }
         }
-
         checkAndRequestFunds()
-    }, [isConnected, address])
+    }, [isConnected, address, balance, loading])
 
     if (!isOpen) return null
 
@@ -73,13 +82,16 @@ export default function WelcomeFundsManager() {
                     <p className="text-acero-600 text-sm mb-6 leading-relaxed">
                         Puedes operar sin problemas.
                     </p>
-
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="w-full bg-acero-800 text-white py-3 px-4 rounded font-bold hover:bg-acero-800 transition-colors uppercase tracking-wider text-sm shadow-lg"
-                    >
-                        Entendido
-                    </button>
+                    {status !== 'sending' && (
+                        <div className="p-6">
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="w-full bg-acero-800 text-white py-3 px-4 rounded font-bold hover:bg-acero-800 transition-colors uppercase tracking-wider text-sm shadow-lg"
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </Modal>
