@@ -16,7 +16,8 @@ export default function WelcomeFundsManager() {
     const [, forceUpdate] = useState(0);
 
     const checkAndRequestFunds = async () => {
-        if (loading) return;
+        if (hasCheckedRef.current || loading) return;
+        hasCheckedRef.current = true;
         setLoading(true);
 
         try {
@@ -28,7 +29,7 @@ export default function WelcomeFundsManager() {
             const data = await response.json();
             setStatus(data.success ? 'success' : 'error');
         } catch (error) {
-            console.error('Error en la preparación de la cuenta:', error);
+            console.error('Error al solicitar fondos:', error);
             setStatus('error');
         } finally {
             setLoading(false);
@@ -36,22 +37,20 @@ export default function WelcomeFundsManager() {
     };
 
     useEffect(() => {
-        if (balance && !hasCheckedRef.current && isConnected) {
+        if (balance && !hasCheckedRef.current) {
+
             const currentBalance = parseFloat(formatEther(balance.value));
 
             if (currentBalance < 0.001) {
-                hasCheckedRef.current = true;
-                setTimeout(() => {
-                    setIsOpen(true);
-                    setStatus('sending');
-                    forceUpdate(n => n + 1);
-                    checkAndRequestFunds();
-                }, 2000);
+                setIsOpen(true);
+                setStatus('sending');
+                forceUpdate(n => n + 1);
+                checkAndRequestFunds();
             } else {
                 hasCheckedRef.current = true;
             }
         }
-    }, [balance?.value, isConnected, address]);
+    }, [balance?.value, isConnected]);
 
     if (!isOpen) return null
 
